@@ -1,0 +1,84 @@
+.event-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-top: 30px solid #fff;
+}
+
+.event-info--when {
+  background: var(--color-primary);
+  color: #fff;
+  border-bottom: 20px solid #fff;
+}
+
+.event-info--where {
+  background: #fff;
+  color: var(--color-primary);
+}
+
+.info-card {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.9rem;
+}
+
+.info-card__gif {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+}
+
+.info-card__title {
+  font-family: var(--font-body);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+
+.info-card__text {
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+}
+
+.event-info--when .info-card__text,
+.event-info--when .info-card__title {
+  color: #fff;
+}
+
+.event-info--where .info-card__text,
+.event-info--where .info-card__title {
+  color: var(--color-primary);
+}
+
+.info-card__btn {
+  margin-top: 0.6rem;
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  padding: 0.55rem 1.4rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  border-radius: 3px;
+  transition:
+    opacity 0.3s,
+    background 0.3s;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.event-info--when .info-card__btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.event-info--where .info-card__btn:hover {
+  background: color-mix(in srgb, var(--color-dark) 6%, transparent);
+}

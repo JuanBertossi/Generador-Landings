@@ -1,0 +1,61 @@
+.hero {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.hero__content {
+  text-align: center;
+}
+
+.hero__eyebrow {
+  font-size: 2rem;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.5rem;
+}
+
+.hero__title {
+  font-size: clamp(4.5rem, 12vw, 8rem);
+  color: #fff;
+  letter-spacing: 0.1em;
+  font-style: italic;
+  margin-bottom: 2.5rem;
+}
+
+.hero__countdown {
+  display: flex;
+  gap: clamp(2.5rem, 5vw, 4rem);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero__count-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.hero__count-num {
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-family: var(--font-heading);
+  color: #fff;
+  line-height: 1;
+  min-width: 2ch;
+  text-align: center;
+}
+
+.hero__count-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.hero__countdown-pasado {
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  color: #fff;
+  letter-spacing: 0.05em;
+}

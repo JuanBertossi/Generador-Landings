@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Generador — tu página, hecha por vos, sin pagarle a nadie</title>
+    <meta
+      name="description"
+      content="Elegís una plantilla, completás tus datos y ves el resultado en vivo. Invitaciones digitales, landings B2B y landings premium — 100% editable, sin crear cuenta."
+    />
+
+    <!--
+      Estas etiquetas og:*/twitter:* son las que se ven al compartir un link
+      (WhatsApp, etc). Acá quedan con el contenido genérico del home. Para
+      una página YA PUBLICADA (/p/:slug), la Cloudflare Function en
+      functions/p/[slug].ts las reemplaza al vuelo con el título/foto de esa
+      página en particular antes de servir este mismo archivo — así cada
+      link compartido muestra su propia miniatura, no la genérica.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Generador — tu página, hecha por vos, sin pagarle a nadie" />
+    <meta
+      property="og:description"
+      content="Elegís una plantilla, completás tus datos y ves el resultado en vivo. 100% editable, sin crear cuenta."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Fuentes tema invitación (86-Miro) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/app/main.tsx"></script>
+  </body>
+</html>

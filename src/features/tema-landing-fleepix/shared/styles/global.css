@@ -1,0 +1,233 @@
+/* ===== Tokens base (Fleepix Design System) =====
+   Sin @import "tailwindcss" ni @custom-variant acá: ya se declaran UNA sola
+   vez en shared/styles/global.css (cargado por main.tsx para toda la app).
+   Repetirlos generaba un segundo reset de Tailwind que, al quedar esta hoja
+   pegada en el documento tras visitar este tema una vez, pisaba los
+   estilos del resto de la app (Home y otros temas) hasta hacer un reload. */
+@theme {
+  --color-neutro-900: #000000;
+  --color-neutro-800: #1f1f1f;
+  --color-neutro-700: #3d3d3d;
+  --color-neutro-600: #5c5c5c;
+  --color-neutro-500: #7e7d7d;
+  --color-neutro-400: #b0b0b0;
+  --color-neutro-300: #d9d9d9;
+  --color-neutro-200: #f7f7f7;
+  --color-neutro-100: #ffffff;
+  --color-navy-900: #001117;
+  --color-navy-800: #001720;
+  --color-navy-700: #001e2a;
+  --color-navy-600: #00212f;
+  --color-navy-500: #002534;
+  --color-navy-400: #4c6671;
+  --color-navy-300: #85969e;
+  --color-navy-200: #bdc6ca;
+  --color-navy-100: #e6e9eb;
+  --color-azul-900: #00425e;
+  --color-azul-800: #005b82;
+  --color-azul-700: #0076a7;
+  --color-azul-600: #0084bc;
+  --color-azul-500: #0093d1;
+  --color-azul-400: #25b0ea;
+  --color-azul-300: #43c7ff;
+  --color-azul-200: #a1e3ff;
+  --color-azul-100: #d9f4ff;
+  --color-verde-900: #415c0e;
+  --color-verde-800: #5c8314;
+  --color-verde-700: #75a619;
+  --color-verde-600: #89c21d;
+  --color-verde-500: #9ada21;
+  --color-verde-400: #bbeb61;
+  --color-verde-300: #d3f790;
+  --color-verde-200: #e3ffaf;
+  --color-verde-100: #f2ffdb;
+  --font-family-sora: "Sora", sans-serif;
+  --font-family-inter:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+:root {
+  --neutro-900: #000000;
+  --neutro-800: #1f1f1f;
+  --neutro-700: #3d3d3d;
+  --neutro-600: #5c5c5c;
+  --neutro-500: #7e7d7d;
+  --neutro-400: #b0b0b0;
+  --neutro-300: #d9d9d9;
+  --neutro-200: #f7f7f7;
+  --neutro-100: #ffffff;
+  --navy-900: #001117;
+  --navy-800: #001720;
+  --navy-700: #001e2a;
+  --navy-600: #00212f;
+  --navy-500: #002534;
+  --navy-400: #4c6671;
+  --navy-300: #85969e;
+  --navy-200: #bdc6ca;
+  --navy-100: #e6e9eb;
+  --azul-900: #00425e;
+  --azul-800: #005b82;
+  --azul-700: #0076a7;
+  --azul-600: #0084bc;
+  --azul-500: #0093d1;
+  --azul-400: #25b0ea;
+  --azul-300: #43c7ff;
+  --azul-200: #a1e3ff;
+  --azul-100: #d9f4ff;
+  --verde-900: #415c0e;
+  --verde-800: #5c8314;
+  --verde-700: #75a619;
+  --verde-600: #89c21d;
+  --verde-500: #9ada21;
+  --verde-400: #bbeb61;
+  --verde-300: #d3f790;
+  --verde-200: #e3ffaf;
+  --verde-100: #f2ffdb;
+
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 8px;
+  --r-pixel: 3px;
+  --r-block: 12px;
+  --maxw: 1360px;
+  --gutter: 16px;
+}
+[data-theme="dark"] {
+  --bg: var(--navy-900);
+  --bg-elev: var(--navy-700);
+  --bg-sunken: #000a10;
+  --border: var(--navy-600);
+  --border-strong: var(--navy-400);
+  --text: var(--neutro-100);
+  --text-soft: var(--navy-200);
+  --text-faint: var(--navy-300);
+  --accent: var(--azul-300);
+  --accent-ink: var(--navy-900);
+  --success: var(--verde-500);
+  --info: var(--azul-300);
+}
+[data-theme="light"] {
+  --bg: var(--neutro-200);
+  --bg-elev: var(--neutro-100);
+  --bg-sunken: #efefef;
+  --border: var(--neutro-300);
+  --border-strong: var(--navy-200);
+  --text: var(--navy-500);
+  --text-soft: var(--neutro-600);
+  --text-faint: var(--neutro-500);
+  --accent: var(--azul-500);
+  --accent-ink: var(--neutro-100);
+  --success: var(--verde-600);
+  --info: var(--azul-300);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+/*
+ * Escopeado a #site (no a html/body sueltos): esta hoja la carga Vite una
+ * sola vez y queda pegada en el documento para siempre durante la sesión de
+ * la SPA (nunca se "descarga" al navegar a otra ruta). Si apuntaran al
+ * elemento global, pisarían para siempre el fondo/tipografía del resto del
+ * sitio (Home, otros temas) apenas alguien visita una página de este tema.
+ */
+#site {
+  background: var(--bg);
+  color: var(--text);
+  position: relative;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+#site h1,
+#site h2,
+#site h3,
+#site h4 {
+  font-family: "Sora", sans-serif;
+}
+/* ===== Scroll reveal (usado por Reveal.tsx en todos los componentes) ===== */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 90ms);
+  will-change: opacity, transform;
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Subrayado animado del título: letras azules -> barrido a blanco -> se mantiene -> se retira.
+   Compartido por Hero y Beneficios, por eso vive acá y no en un archivo por componente. */
+.hl {
+  color: var(--azul-600);
+  background-image: linear-gradient(var(--azul-500), var(--azul-500));
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 0% 100%;
+  padding: 0 0.12em;
+  border-radius: var(--r-xs);
+  animation: hl-sweep 7s ease-in-out infinite;
+}
+.hl:nth-of-type(2) {
+  animation-delay: 0.6s;
+}
+@keyframes hl-sweep {
+  0%,
+  6% {
+    background-size: 0% 100%;
+    color: var(--azul-600);
+  }
+  20% {
+    background-size: 100% 100%;
+    color: var(--neutro-100);
+  }
+  68% {
+    background-size: 100% 100%;
+    color: var(--neutro-100);
+  }
+  84%,
+  100% {
+    background-size: 0% 100%;
+    color: var(--azul-600);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+  }
+}

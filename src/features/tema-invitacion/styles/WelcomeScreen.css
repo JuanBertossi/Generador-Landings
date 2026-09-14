@@ -1,0 +1,54 @@
+.welcome {
+  position: fixed;
+  inset: 0;
+  background: var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 9999;
+  padding: 2rem;
+  text-align: center;
+}
+
+.welcome__eyebrow {
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+}
+
+.welcome__title {
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 10vw, 6rem);
+  color: #fff;
+  letter-spacing: 0.1em;
+  font-style: italic;
+}
+
+.welcome__sub {
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
+  color: rgba(255,255,255,0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  max-width: 400px;
+  line-height: 1.8;
+}
+
+.welcome__btn {
+  margin-top: 0.5rem;
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.6);
+  padding: 0.75rem 3rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  transition: background 0.3s, border-color 0.3s;
+}
+.welcome__btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: #fff;
+}

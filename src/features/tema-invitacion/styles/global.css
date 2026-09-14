@@ -1,0 +1,81 @@
+/* Scopeado a .invitacion-root (no a *,html,body sueltos) por el mismo motivo
+   que el resto de este archivo: esta hoja queda pegada en el documento para
+   siempre tras visitar este tema una vez, y un reset sin scopear pisaría
+   para siempre el resto de la app (Home, otros temas). */
+.invitacion-root,
+.invitacion-root *,
+.invitacion-root *::before,
+.invitacion-root *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg:      #f0f5fb;
+  --color-bg2:     #dce8f5;
+  --color-primary: #273B56;
+  --color-mid:     #3d5a80;
+  --color-light:   #e8f1fa;
+  --color-accent:  #6b93c4;
+  --color-dark:    #1a2a3a;
+  --font-body:     'Montserrat', sans-serif;
+  --font-heading:  'Playfair Display', serif;
+}
+
+html { scroll-behavior: smooth; }
+
+/*
+ * Estas reglas van escopeadas a .invitacion-root (no a body/h1-h4 sueltos):
+ * esta hoja la carga Vite una sola vez y queda pegada en el documento para
+ * siempre durante la sesión de la SPA (nunca se "descarga" al navegar a
+ * otra ruta). Si apuntaran al elemento global, pisarían para siempre la
+ * tipografía del resto del sitio (Home, otros temas) apenas alguien visita
+ * una página de este tema, aunque después vuelva a otra ruta.
+ */
+.invitacion-root {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-dark);
+  overflow-x: hidden;
+  color-scheme: light;
+}
+
+.invitacion-root h1,
+.invitacion-root h2,
+.invitacion-root h3,
+.invitacion-root h4 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  opacity: 0;
+  animation: fadeUp 0.7s ease forwards;
+}
+.fade-up.delay-1 { animation-delay: 0.2s; }
+.fade-up.delay-2 { animation-delay: 0.4s; }
+.fade-up.delay-3 { animation-delay: 0.6s; }
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--color-mid);
+  width: 300px;
+  margin: 0 auto 1.5rem;
+}
+
+.alignfull {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+.section {
+  padding: 60px 40px;
+  text-align: center;
+}

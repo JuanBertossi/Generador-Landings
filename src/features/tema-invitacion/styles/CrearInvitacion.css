@@ -1,0 +1,349 @@
+.crear-invitacion {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  min-height: 100vh;
+  background: #0b0b0f;
+}
+
+.crear-invitacion__form {
+  padding: 32px 28px;
+  overflow-y: auto;
+  max-height: 100vh;
+  color: #f5f5f7;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.crear-invitacion__form h1 {
+  font-size: 20px;
+  margin: 0 0 4px;
+}
+
+.crear-invitacion__form > p {
+  opacity: 0.6;
+  font-size: 13px;
+  margin: 0 0 24px;
+}
+
+.crear-invitacion__form > p.crear-invitacion__aviso-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  opacity: 1;
+  font-size: 12.5px;
+  margin: -14px 0 24px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 200, 0, 0.1);
+  border: 1px solid rgba(255, 200, 0, 0.25);
+  color: #ffd666;
+  line-height: 1.4;
+}
+
+.crear-invitacion__aviso-link svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.crear-invitacion__fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 24px;
+}
+
+.crear-invitacion__fieldset legend {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.5;
+  padding: 0 0 10px;
+}
+
+.crear-invitacion__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.crear-invitacion__field label {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.crear-invitacion__color-row {
+  display: flex;
+  gap: 8px;
+}
+
+.crear-invitacion__color-row input[type="color"] {
+  width: 40px;
+  height: 34px;
+  padding: 2px;
+  flex: none;
+  cursor: pointer;
+}
+
+.crear-invitacion__color-row input[type="text"] {
+  flex: 1;
+}
+
+.crear-invitacion__field input,
+.crear-invitacion__field textarea {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 9px 11px;
+  color: #f5f5f7;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.crear-invitacion__field textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.crear-invitacion__precio-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.crear-invitacion__precio-row input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 9px 11px;
+  color: #f5f5f7;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.crear-invitacion__btn-quitar {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #f5f5f7;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+.crear-invitacion__btn-agregar {
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: #f5f5f7;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 13px;
+  width: 100%;
+}
+
+.crear-invitacion__subdominio {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 20px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(107, 147, 196, 0.1);
+  border: 1px solid rgba(107, 147, 196, 0.3);
+  color: rgba(245, 245, 247, 0.85);
+}
+
+.crear-invitacion__subdominio svg {
+  flex: none;
+  margin-top: 2px;
+  color: #6b93c4;
+}
+
+.crear-invitacion__subdominio p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.crear-invitacion__subdominio strong {
+  color: #f5f5f7;
+}
+
+.crear-invitacion__subdominio a {
+  color: #6b93c4;
+  font-weight: 600;
+}
+
+.crear-invitacion__precio-final {
+  margin: 16px 0 0;
+  font-size: 13px;
+  text-align: center;
+  color: rgba(245, 245, 247, 0.7);
+}
+
+.crear-invitacion__precio-final strong {
+  color: #f5f5f7;
+  font-size: 15px;
+  margin: 0 5px;
+}
+
+.crear-invitacion__precio-tachado {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.crear-invitacion__btn-generar {
+  width: 100%;
+  background: #f5f5f7;
+  color: #0b0b0f;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.crear-invitacion__btn-generar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.crear-invitacion__error {
+  margin: 12px 0 0;
+  font-size: 13px;
+  text-align: center;
+  color: #ff8a8a;
+}
+
+.crear-invitacion__error-pantalla {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  padding: 24px;
+  background: #0b0b0f;
+  color: #f5f5f7;
+  text-align: center;
+  font-size: 15px;
+}
+
+.crear-invitacion__error-pantalla svg {
+  color: rgba(245, 245, 247, 0.4);
+}
+
+.crear-invitacion__error-pantalla a {
+  color: #ffd666;
+  font-size: 14px;
+}
+
+.crear-invitacion__resultado {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(110, 231, 150, 0.28);
+  border-radius: 10px;
+  background: rgba(110, 231, 150, 0.06);
+  font-size: 14px;
+}
+
+.crear-invitacion__resultado-titulo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: #6ee796;
+}
+
+.crear-invitacion__resultado-label {
+  opacity: 0.7;
+  font-size: 12.5px;
+  margin: 10px 0 0;
+}
+
+.crear-invitacion__resultado-url {
+  font-weight: 600;
+  font-size: 16px;
+  margin: 6px 0;
+  word-break: break-all;
+}
+
+.crear-invitacion__resultado-nota {
+  opacity: 0.55;
+  font-size: 12px;
+  margin: 12px 0 0;
+  line-height: 1.5;
+}
+
+.crear-invitacion__resultado-editar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.crear-invitacion__resultado-editar-row input {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+  color: #ffd666;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 7px 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.crear-invitacion__resultado-editar-row button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #f5f5f7;
+  border-radius: 6px;
+  padding: 7px 11px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.crear-invitacion__resultado-editar-row button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.crear-invitacion__preview {
+  position: relative;
+  overflow-y: auto;
+  max-height: 100vh;
+  background: #000;
+  contain: layout;
+}
+
+.crear-invitacion__preview-frame {
+  transform: scale(1);
+  transform-origin: top left;
+}
+
+@media (max-width: 900px) {
+  .crear-invitacion {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .crear-invitacion__form {
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .crear-invitacion__preview {
+    max-height: 70vh;
+  }
+}

@@ -1,0 +1,21 @@
+.quote-section {
+  background: white;
+  padding: 60px 40px;
+  border-top: 20px solid #fff;
+}
+
+.quote__text {
+  font-family: 'Montserrat';
+  font-size: clamp(1rem, 5vw, 1.5rem);
+  color: var(--color-primary);
+  max-width: 1200px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .quote__text {
+    font-size: 19px;
+  }
+}

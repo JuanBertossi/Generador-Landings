@@ -1,0 +1,719 @@
+/* ===== FUNCIONALIDADES: sticky + stacking cards ===== */
+/* --- visuales animados de las tarjetas (navy liso, celeste/azul, verde solo validación) --- */
+.fk-shot.viz {
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.fk-viz {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 1) Sincronización AFIP: dos fases (sync + validación en tabla) */
+.viz-sync {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 82%;
+  max-width: 280px;
+}
+.viz-sync .sync-top {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.viz-sync .snode {
+  flex: none;
+  font-family: "Sora";
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--azul-100);
+  background: var(--navy-700);
+  border: 1px solid color-mix(in srgb, var(--azul-400) 45%, transparent);
+  border-radius: var(--r-sm);
+  padding: 7px 11px;
+  position: relative;
+}
+.viz-sync .snode.b {
+  animation: sync-arrive 6s ease-out infinite;
+}
+.viz-sync .swire {
+  position: relative;
+  flex: 1;
+  height: 2px;
+  margin: 0 3px;
+  background: color-mix(in srgb, var(--azul-400) 20%, transparent);
+}
+.viz-sync .sglow {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: var(--azul-300);
+  box-shadow: 0 0 6px var(--azul-300);
+  animation: sync-glow 6s ease-out infinite;
+}
+.viz-sync .spacket {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--azul-300);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px 2px var(--azul-300);
+  animation: sync-travel 6s cubic-bezier(0.45, 0, 0.5, 1) infinite;
+}
+.viz-sync .sync-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+.viz-sync .srow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: "Sora";
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--azul-100);
+  background: var(--navy-700);
+  border: 1px solid var(--navy-600);
+  border-radius: var(--r-sm);
+  padding: 5px 9px;
+  opacity: 0;
+}
+.viz-sync .srow .rchk {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  color: var(--verde-500);
+  display: inline-flex;
+}
+.viz-sync .srow:nth-child(1) {
+  animation: srow-in 6s ease-out infinite;
+}
+.viz-sync .srow:nth-child(2) {
+  animation: srow-in2 6s ease-out infinite;
+}
+.viz-sync .srow:nth-child(3) {
+  animation: srow-in3 6s ease-out infinite;
+}
+.viz-sync .srow:nth-child(4) {
+  animation: srow-in4 6s ease-out infinite;
+}
+@keyframes sync-travel {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  26% {
+    left: 100%;
+    opacity: 1;
+  }
+  30%,
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+@keyframes sync-glow {
+  0%,
+  4% {
+    transform: scaleX(0);
+  }
+  26%,
+  92% {
+    transform: scaleX(1);
+  }
+  97%,
+  100% {
+    transform: scaleX(0);
+  }
+}
+@keyframes sync-arrive {
+  0%,
+  24% {
+    box-shadow: 0 0 0 0 rgba(67, 199, 255, 0);
+  }
+  30% {
+    box-shadow: 0 0 0 5px rgba(67, 199, 255, 0.4);
+  }
+  38%,
+  100% {
+    box-shadow: 0 0 0 12px rgba(67, 199, 255, 0);
+  }
+}
+@keyframes srow-in {
+  0%,
+  36% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  44%,
+  92% {
+    opacity: 1;
+    transform: none;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes srow-in2 {
+  0%,
+  45% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  53%,
+  92% {
+    opacity: 1;
+    transform: none;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes srow-in3 {
+  0%,
+  54% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  62%,
+  92% {
+    opacity: 1;
+    transform: none;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes srow-in4 {
+  0%,
+  63% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  71%,
+  92% {
+    opacity: 1;
+    transform: none;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 1b) Liquidación Inteligente: mini-dashboard financiero */
+.viz-liq {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 88%;
+  max-width: 380px;
+}
+.viz-liq .liq-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  flex: none;
+}
+.viz-liq .liq-ring {
+  position: relative;
+  width: 66px;
+  height: 66px;
+}
+.viz-liq .liq-ring > svg {
+  width: 66px;
+  height: 66px;
+  transform: rotate(-90deg);
+}
+.viz-liq .ring-bg {
+  fill: none;
+  stroke: var(--navy-600);
+  stroke-width: 5;
+}
+.viz-liq .ring-fg {
+  fill: none;
+  stroke: var(--azul-300);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 163;
+  stroke-dashoffset: 163;
+  animation: liq-ring 6s ease-out infinite;
+}
+.viz-liq .ring-check {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--verde-500);
+  opacity: 0;
+  transform: scale(0.4);
+  animation: liq-check 6s ease-out infinite;
+}
+.viz-liq .liq-total {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.viz-liq .amount {
+  font-family: "Sora";
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  color: var(--neutro-100);
+  line-height: 1;
+}
+.viz-liq .liq-total .lbl {
+  font-family: "Sora";
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--azul-200);
+  margin-top: 5px;
+  text-transform: uppercase;
+}
+.viz-liq .liq-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+.viz-liq .lqbar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.viz-liq .bt {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: "Sora";
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--azul-100);
+}
+.viz-liq .bt b {
+  font-weight: 700;
+  color: var(--neutro-100);
+}
+.viz-liq .track {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--navy-600);
+  overflow: hidden;
+}
+.viz-liq .fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--azul-500), var(--azul-300));
+}
+.viz-liq .f1 {
+  animation: liq-bar1 6s ease-out infinite;
+}
+.viz-liq .f2 {
+  animation: liq-bar2 6s ease-out infinite;
+}
+.viz-liq .f3 {
+  animation: liq-bar3 6s ease-out infinite;
+}
+@keyframes liq-ring {
+  0% {
+    stroke-dashoffset: 163;
+  }
+  70%,
+  92% {
+    stroke-dashoffset: 0;
+  }
+  97%,
+  100% {
+    stroke-dashoffset: 163;
+  }
+}
+@keyframes liq-check {
+  0%,
+  68% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  76%,
+  92% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  97%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+@keyframes liq-bar1 {
+  0%,
+  8% {
+    width: 0;
+  }
+  55%,
+  92% {
+    width: var(--w);
+  }
+  98%,
+  100% {
+    width: 0;
+  }
+}
+@keyframes liq-bar2 {
+  0%,
+  22% {
+    width: 0;
+  }
+  62%,
+  92% {
+    width: var(--w);
+  }
+  98%,
+  100% {
+    width: 0;
+  }
+}
+@keyframes liq-bar3 {
+  0%,
+  36% {
+    width: 0;
+  }
+  70%,
+  92% {
+    width: var(--w);
+  }
+  98%,
+  100% {
+    width: 0;
+  }
+}
+
+/* 2) Seguridad Financiera: escudo dibujándose + validaciones */
+.viz-shield {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.viz-shield .shield-svg {
+  width: 56px;
+  height: 64px;
+}
+.viz-shield .shield-body {
+  fill: none;
+  stroke: var(--azul-300);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 150;
+  stroke-dashoffset: 150;
+  animation: draw 4.8s ease-in-out infinite;
+}
+.viz-shield .shield-check {
+  fill: none;
+  stroke: var(--verde-500);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 22;
+  stroke-dashoffset: 22;
+  animation: draw-check 4.8s ease-in-out infinite;
+}
+@keyframes draw {
+  0% {
+    stroke-dashoffset: 150;
+  }
+  30%,
+  90% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 150;
+  }
+}
+@keyframes draw-check {
+  0%,
+  25% {
+    stroke-dashoffset: 22;
+  }
+  40%,
+  90% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 22;
+  }
+}
+.viz-shield .checks {
+  display: flex;
+  gap: 8px;
+}
+.viz-shield .vchk {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "Sora";
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--navy-200);
+  background: var(--navy-700);
+  border: 1px solid var(--navy-600);
+  border-radius: var(--r-sm);
+  padding: 4px 8px;
+  animation: vtick 4.8s ease-in-out infinite;
+  animation-delay: var(--d);
+}
+.viz-shield .vchk i {
+  width: 12px;
+  height: 12px;
+  display: inline-flex;
+}
+@keyframes vtick {
+  0%,
+  20% {
+    color: var(--navy-200);
+    border-color: var(--navy-600);
+  }
+  35%,
+  88% {
+    color: var(--verde-400);
+    border-color: color-mix(in srgb, var(--verde-500) 50%, transparent);
+  }
+  100% {
+    color: var(--navy-200);
+    border-color: var(--navy-600);
+  }
+}
+
+/* 3) Alertas de Cumplimiento: campana + toasts en cascada */
+.viz-alert {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 84%;
+  max-width: 260px;
+}
+.viz-alert .bell-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.viz-alert .bell-ic {
+  color: var(--azul-200);
+  display: block;
+  animation: bell-swing 6s ease-in-out infinite;
+  transform-origin: top center;
+}
+.viz-alert .ping {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border-radius: 50%;
+  border: 2px solid var(--azul-300);
+  animation: bell-ping 6s ease-out infinite;
+}
+.viz-alert .toasts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+.viz-alert .toast {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "Sora";
+  font-size: 10.5px;
+  font-weight: 600;
+  background: var(--neutro-100);
+  border: 1px solid color-mix(in srgb, var(--navy-900) 8%, transparent);
+  border-left-width: 3px;
+  border-radius: var(--r-sm);
+  padding: 6px 9px;
+  color: var(--navy-500);
+  opacity: 0;
+  box-shadow: 0 6px 16px rgba(0, 17, 23, 0.28);
+}
+.viz-alert .toast.ok {
+  border-left-color: var(--verde-500);
+}
+.viz-alert .toast.ok svg {
+  color: var(--verde-500);
+}
+.viz-alert .toast.wait {
+  border-left-color: var(--azul-300);
+}
+.viz-alert .toast.wait svg {
+  color: var(--azul-300);
+}
+.viz-alert .toast.wait svg.spin {
+  animation: spin 1.4s linear infinite;
+}
+.viz-alert .toast:nth-child(1) {
+  animation: toast-in 6s ease-out infinite;
+}
+.viz-alert .toast:nth-child(2) {
+  animation: toast-in2 6s ease-out infinite;
+}
+.viz-alert .toast:nth-child(3) {
+  animation: toast-in3 6s ease-out infinite;
+}
+@keyframes bell-swing {
+  0%,
+  8%,
+  100% {
+    transform: rotate(0);
+  }
+  11% {
+    transform: rotate(12deg);
+  }
+  15% {
+    transform: rotate(-9deg);
+  }
+  19% {
+    transform: rotate(6deg);
+  }
+  23% {
+    transform: rotate(-3deg);
+  }
+  27% {
+    transform: rotate(0);
+  }
+}
+@keyframes bell-ping {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  18%,
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes toast-in {
+  0%,
+  26% {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  34%,
+  90% {
+    opacity: 1;
+    transform: none;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes toast-in2 {
+  0%,
+  40% {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  48%,
+  90% {
+    opacity: 1;
+    transform: none;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes toast-in3 {
+  0%,
+  54% {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  62%,
+  90% {
+    opacity: 1;
+    transform: none;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .viz-sync .spacket,
+  .viz-sync .sglow,
+  .viz-sync .snode.b,
+  .viz-sync .srow,
+  .viz-liq .ring-fg,
+  .viz-liq .ring-check,
+  .viz-liq .fill,
+  .viz-shield .shield-body,
+  .viz-shield .shield-check,
+  .viz-shield .vchk,
+  .viz-alert .bell-ic,
+  .viz-alert .ping,
+  .viz-alert .toast,
+  .viz-alert .toast.wait svg {
+    animation: none;
+  }
+  .viz-sync .srow,
+  .viz-alert .toast {
+    opacity: 1;
+  }
+  .viz-sync .sglow {
+    transform: scaleX(1);
+  }
+  .viz-liq .ring-fg {
+    stroke-dashoffset: 0;
+  }
+  .viz-liq .ring-check {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .viz-liq .f1 {
+    width: 90%;
+  }
+  .viz-liq .f2 {
+    width: 42%;
+  }
+  .viz-liq .f3 {
+    width: 20%;
+  }
+  .viz-shield .shield-body,
+  .viz-shield .shield-check {
+    stroke-dashoffset: 0;
+  }
+}

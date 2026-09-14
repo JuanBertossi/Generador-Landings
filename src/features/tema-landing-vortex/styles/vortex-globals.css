@@ -1,0 +1,255 @@
+/* Sin @import "tailwindcss" ni @custom-variant acá: ya se declaran UNA sola
+   vez en shared/styles/global.css (cargado por main.tsx para toda la app).
+   Repetirlos generaba un segundo Tailwind que, al quedar esta hoja pegada
+   en el documento tras visitar este tema una vez, pisaba los estilos del
+   resto de la app (Home y otros temas) hasta hacer un reload completo. */
+
+@theme {
+  --font-bricolage: "Bricolage Grotesque", sans-serif;
+}
+
+/* Colores configurables por el usuario (fondo/texto/acento principal).
+   El violeta secundario queda fijo — es parte de la identidad de dos tonos
+   de esta plantilla, no tiene sentido derivarlo de un solo selector. */
+:root {
+  --v-bg: #07070e;
+  --v-text: #ffffff;
+  --v-accent: #00ff88;
+}
+
+@keyframes vSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes vFloaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+
+@keyframes vGlowA {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+  50% { transform: translate(-30px, 20px) scale(1.12); opacity: 0.95; }
+}
+
+@keyframes vGlowB {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+  50% { transform: translate(30px, -20px) scale(1.1); opacity: 1; }
+}
+
+@keyframes vMsgIn {
+  0% { opacity: 0; transform: translateY(10px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes vDot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+@keyframes vCaret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes vClose {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes vNodeIn {
+  0% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes vLineDraw {
+  0% { stroke-dashoffset: 130; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes vCorePulse {
+  0%, 100% { box-shadow: 0 0 28px 4px rgba(124, 58, 237, 0.5); }
+  50% { box-shadow: 0 0 44px 10px rgba(0, 255, 136, 0.45); }
+}
+
+@keyframes vortexFloatA {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(50px, 40px); }
+}
+
+@keyframes vortexFloatB {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-50px, -40px); }
+}
+
+@keyframes ctaBgShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes ctaAuraA {
+  0% { transform: translate(-58%, 0) scale(1); opacity: 0.3; }
+  50% { transform: translate(-42%, 26px) scale(1.18); opacity: 0.5; }
+  100% { transform: translate(-58%, 0) scale(1); opacity: 0.3; }
+}
+
+@keyframes ctaAuraB {
+  0% { transform: translate(-44%, 18px) scale(1.12); opacity: 0.42; }
+  50% { transform: translate(-60%, -12px) scale(1); opacity: 0.24; }
+  100% { transform: translate(-44%, 18px) scale(1.12); opacity: 0.42; }
+}
+
+@keyframes arrowSlide {
+  0% { transform: translateX(-3px); opacity: 0.25; }
+  40% { opacity: 1; }
+  65% { opacity: 1; }
+  100% { transform: translateX(6px); opacity: 0; }
+}
+
+@keyframes gbtnShift {
+  0% { background-position: 35% 50%; }
+  50% { background-position: 65% 50%; }
+  100% { background-position: 35% 50%; }
+}
+
+@keyframes gbtnGlow {
+  0% { box-shadow: 0 8px 30px -6px rgba(45, 255, 168, 0.55); }
+  50% { box-shadow: 0 8px 30px -6px rgba(176, 124, 255, 0.6); }
+  100% { box-shadow: 0 8px 30px -6px rgba(45, 255, 168, 0.55); }
+}
+
+.bicon {
+  backface-visibility: hidden;
+  transition:
+    transform 0.65s cubic-bezier(0.5, 0.15, 0.2, 1),
+    background 0.4s ease,
+    color 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+.bcard:hover .bnum {
+  color: var(--ic) !important;
+}
+.bcard:hover .bicon {
+  transform: rotateY(360deg);
+  background: var(--ic) !important;
+  color: #06120c !important;
+  border-color: var(--ic) !important;
+  box-shadow: 0 10px 26px -8px var(--ic);
+}
+.bcard {
+  transition: transform 0.35s;
+}
+.bcard:hover {
+  transform: translateY(-6px);
+}
+
+.faq-item:hover,
+.faq-item.faq-open {
+  border-color: rgba(0, 255, 136, 0.6) !important;
+}
+.faq-item:hover > button,
+.faq-item.faq-open > button {
+  color: var(--v-accent) !important;
+}
+
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+
+.prod-btn {
+  margin-top: 8px;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 22px;
+  border-radius: 11px;
+  cursor: pointer;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  color: #c9b6ff;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+.prod-btn:hover {
+  border-color: rgba(124, 58, 237, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -12px rgba(124, 58, 237, 0.6);
+}
+
+.prod-card-active {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.4s ease-in-out;
+}
+.prod-card-inactive {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease-in-out;
+}
+@media (min-width: 640px) {
+  .prod-card-inactive {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+
+@media (hover: hover) {
+  .prod-card-1:hover {
+    box-shadow: 0 32px 72px -28px rgba(124, 58, 237, 0.45);
+    background: linear-gradient(
+      120deg,
+      rgba(124, 58, 237, 0.95),
+      rgba(0, 255, 136, 0.18) 50%,
+      rgba(0, 255, 136, 0.85)
+    ) !important;
+    transition:
+      background 0.4s,
+      box-shadow 0.4s;
+  }
+  .prod-card-2:hover {
+    box-shadow: 0 32px 72px -28px rgba(0, 255, 136, 0.4);
+    background: linear-gradient(
+      120deg,
+      rgba(0, 255, 136, 0.9),
+      rgba(124, 58, 237, 0.18) 50%,
+      rgba(124, 58, 237, 0.85)
+    ) !important;
+    transition:
+      background 0.4s,
+      box-shadow 0.4s;
+  }
+}
+
+.gbtn {
+  background-image: linear-gradient(110deg, #2dffa8, #7fd8b0, #b07cff) !important;
+  background-size: 150% 100% !important;
+  animation:
+    gbtnShift 11s ease-in-out infinite,
+    gbtnGlow 11s ease-in-out infinite;
+  color: #06160e !important;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.78);
+}
