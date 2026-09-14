@@ -53,7 +53,7 @@ export function EditableText({
 
   function handleBlur(e: FocusEvent<HTMLElement>) {
     setEditando(false)
-    onChange(path, e.currentTarget.textContent ?? '')
+    onChange(path, e.currentTarget.innerText ?? '')
   }
 
   return (

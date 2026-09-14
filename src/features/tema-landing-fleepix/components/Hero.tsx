@@ -4,9 +4,11 @@ import { textoConEnfasis } from "../lib/textoConEnfasis";
 import type { LandingFleepixConfig } from "../config";
 import { EditableText } from "@/shared/components/EditableText";
 import { EditableImagen } from "@/shared/components/EditableImagen";
+import { useEditable } from "@/shared/components/EditableContext";
 
 export function Hero({ config }: { config: LandingFleepixConfig }) {
   const ctaUrl = buildWhatsappUrl(config.whatsappNumero, config.whatsappMensajeDemo);
+  const { editable } = useEditable();
 
   return (
     <header
@@ -16,7 +18,9 @@ export function Hero({ config }: { config: LandingFleepixConfig }) {
       <div className="w-full max-w-[var(--maxw)] mx-auto grid grid-cols-[1.12fr_1fr] max-[900px]:grid-cols-1 gap-4 items-stretch">
         <div className="group relative rounded-[var(--r-block)] overflow-hidden min-h-[660px] max-[900px]:min-h-[300px] max-[900px]:order-2 border border-[var(--border)] bg-[var(--bg)] flex flex-col justify-between items-start p-[22px]">
           <div className="absolute inset-0 [perspective:1400px] z-0">
-            <div className="relative w-full h-full [transform-style:preserve-3d] transition-transform duration-[800ms] ease-[cubic-bezier(0.4,0.15,0.2,1)] group-hover:[transform:rotateY(180deg)] motion-reduce:transition-none">
+            <div
+              className={`relative w-full h-full [transform-style:preserve-3d] transition-transform duration-[800ms] ease-[cubic-bezier(0.4,0.15,0.2,1)] motion-reduce:transition-none ${editable ? '' : 'group-hover:[transform:rotateY(180deg)]'}`}
+            >
               <EditableImagen
                 path="hero.fotoPrincipal"
                 src={config.hero.fotoPrincipal}
@@ -25,14 +29,28 @@ export function Hero({ config }: { config: LandingFleepixConfig }) {
                 height={1204}
                 loading="eager"
               />
-              <EditableImagen
-                path="hero.fotoSecundaria"
-                src={config.hero.fotoSecundaria}
-                className="absolute inset-0 w-full h-full object-cover object-center [backface-visibility:hidden] [-webkit-backface-visibility:hidden] rounded-[var(--r-block)] [transform:rotateY(180deg)]"
-                width={1024}
-                height={1204}
-              />
+              {!editable && (
+                <EditableImagen
+                  path="hero.fotoSecundaria"
+                  src={config.hero.fotoSecundaria}
+                  className="absolute inset-0 w-full h-full object-cover object-center [backface-visibility:hidden] [-webkit-backface-visibility:hidden] rounded-[var(--r-block)] [transform:rotateY(180deg)]"
+                  width={1024}
+                  height={1204}
+                />
+              )}
             </div>
+            {editable && (
+              <div className="absolute bottom-3 right-3 z-[2] flex flex-col items-center gap-1">
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-white bg-black/70 px-2 py-1 rounded whitespace-nowrap">
+                  Foto secundaria (al pasar el mouse)
+                </span>
+                <EditableImagen
+                  path="hero.fotoSecundaria"
+                  src={config.hero.fotoSecundaria}
+                  className="w-[64px] h-[64px] object-cover rounded-md border-2 border-white/80"
+                />
+              </div>
+            )}
           </div>
           <span className="inline-flex items-center gap-[9px] border rounded-[var(--r-sm)] px-[13px] py-[6px] font-['Sora'] font-semibold text-[11px] tracking-[0.14em] uppercase relative z-[1] bg-[color-mix(in_srgb,var(--navy-900)_45%,transparent)] border-[color-mix(in_srgb,var(--neutro-100)_22%,transparent)] text-[var(--navy-100)] backdrop-blur-[4px]">
             <span className="w-[7px] h-[7px] rounded-[var(--r-pixel)] bg-[var(--azul-400)]"></span>
@@ -41,22 +59,23 @@ export function Hero({ config }: { config: LandingFleepixConfig }) {
         </div>
 
         <div className="grid grid-rows-[1fr] max-[900px]:grid-rows-[auto] max-[900px]:order-1 gap-4 min-w-0">
-          <div className="bg-[var(--bg-elev)] border border-[var(--border)] rounded-[var(--r-block)] pt-14 px-12 pb-12 max-[900px]:px-7 max-[900px]:py-9 max-[480px]:px-5 max-[480px]:py-[26px] max-[480px]:gap-6 flex flex-col justify-between gap-8">
+          <div className="bg-[var(--bg-elev)] border border-[var(--border)] rounded-[var(--r-block)] pt-14 px-12 pb-12 max-[900px]:px-7 max-[900px]:py-9 max-[480px]:px-5 max-[480px]:py-[26px] max-[480px]:gap-6 flex flex-col gap-8">
             <h1 className="font-['Sora'] font-bold text-[clamp(34px,4vw,60px)] max-[768px]:text-[clamp(30px,7vw,42px)] max-[480px]:text-[clamp(25px,8vw,32px)] leading-[1.03] max-[768px]:leading-[1.18] tracking-[-0.03em] max-[768px]:tracking-[-0.015em] m-0 text-balance">
-              {textoConEnfasis(config.hero.titulo)}
+              <EditableText path="hero.titulo" value={config.hero.titulo} as="span" multiline render={textoConEnfasis} />
             </h1>
-            <div className="flex flex-col gap-[26px]">
+            <div className="flex flex-col gap-[26px] flex-1">
               <p className="text-[16.5px] text-[var(--text-soft)] m-0 leading-[1.62] max-w-[50ch]">
-                {config.hero.descripcion}
+                <EditableText path="hero.descripcion" value={config.hero.descripcion} as="span" multiline />
               </p>
-              <div className="flex gap-3 flex-wrap max-[480px]:flex-col max-[480px]:items-stretch">
+              <div className="flex gap-3 flex-wrap max-[480px]:flex-col max-[480px]:items-stretch mt-auto">
                 <a
                   className="inline-flex items-center justify-center gap-[9px] font-['Inter'] font-semibold text-[15px] cursor-pointer rounded-xl px-[26px] py-[11px] border border-transparent transition-[transform,background,border-color,box-shadow] duration-150 whitespace-nowrap bg-[var(--accent)] text-[var(--accent-ink)] shadow-[0_6px_22px_color-mix(in_srgb,var(--accent)_28%,transparent)] hover:-translate-y-px hover:bg-[var(--azul-400)] hover:shadow-[0_8px_26px_color-mix(in_srgb,var(--accent)_38%,transparent)]"
+                  style={{ color: 'var(--accent-ink)' }}
                   href={ctaUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {config.hero.cta1Label}
+                  <EditableText path="hero.cta1Label" value={config.hero.cta1Label} as="span" />
                   <ArrowRight className="w-[17px] h-[17px] flex-none" strokeWidth={2.4} />
                 </a>
                 <a
@@ -66,7 +85,13 @@ export function Hero({ config }: { config: LandingFleepixConfig }) {
                   rel="noopener noreferrer"
                 >
                   <PlayCircle className="w-auto h-auto text-[20px] flex-none" strokeWidth={2} />
-                  {config.hero.cta2Label}
+                  <EditableText path="hero.cta2Label" value={config.hero.cta2Label} as="span" />
                 </a>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}

@@ -1,5 +1,9 @@
 .birthday-section {
-  height: 168px;
+  /* min-height (no height fijo): el título es editable inline y ahora
+     puede tener más líneas de las que caben en 168px — con height fijo
+     el texto se desbordaría sobre la sección siguiente en vez de que la
+     caja crezca. */
+  min-height: 168px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -1,4 +1,8 @@
 import fotoPrincipalDefault from './assets/images/Hero-Image.png'
+import fotoCuandoDefault from './assets/gifs/calendario.gif'
+import fotoDondeDefault from './assets/gifs/bola-fiesta.gif'
+import fondoFooterDefault from './assets/images/fuegos-artificiales.png'
+import fotoRsvpDefault from './assets/gifs/mensaje.gif'
 
 /**
  * Config del tema Invitación. Esto es lo que en el generador va a llenar
@@ -38,10 +42,12 @@ export const invitacionDefaultConfig = {
     telefonoWhatsapp: '00000000000',
     mensajePlantilla: 'Hola! Confirmo mi asistencia al cumple de {nombre}',
     fechaLimiteISO: '2026-03-16',
+    fotoMensaje: fotoRsvpDefault,
   },
 
   footer: {
     titulo: 'TE ESPERO',
+    fotoFondo: fondoFooterDefault,
   },
 
   precios: [
@@ -50,6 +56,8 @@ export const invitacionDefaultConfig = {
   ],
 
   fotoPrincipal: fotoPrincipalDefault,
+  fotoCuando: fotoCuandoDefault,
+  fotoDonde: fotoDondeDefault,
 
   // Textos fijos de la interfaz (botones, títulos de sección) — editables
   // para poder adaptar el tono (cumpleaños vs casamiento vs baby shower).
@@ -94,12 +102,19 @@ export const invitacionBlankConfig = {
     telefonoWhatsapp: '',
     mensajePlantilla: 'Hola! Confirmo mi asistencia a la fiesta de {nombre}',
     fechaLimiteISO: '',
+    // Gif genérico de fiesta, no una foto de la persona — se puede dejar
+    // el default sin que la invitación "se note copiada" (a diferencia de
+    // fotoPrincipal, que sí es la foto real del festejado).
+    fotoMensaje: fotoRsvpDefault,
   },
   footer: {
     titulo: 'TE ESPERO',
+    fotoFondo: fondoFooterDefault,
   },
   precios: [{ categoria: 'General', precio: '' }],
-  fotoPrincipal: fotoPrincipalDefault,
+  fotoPrincipal: '',
+  fotoCuando: fotoCuandoDefault,
+  fotoDonde: fotoDondeDefault,
   textos: {
     botonIngresar: 'INGRESAR',
     labelCuando: '¿CUÁNDO?',

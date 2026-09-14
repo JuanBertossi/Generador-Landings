@@ -1,8 +1,11 @@
 import "../styles/EventInfo.css";
 
-import calendarioGif from "../assets/gifs/calendario.gif";
-import bolaFiestaGif from "../assets/gifs/bola-fiesta.gif";
+import calendarioGifDefault from "../assets/gifs/calendario.gif";
+import bolaFiestaGifDefault from "../assets/gifs/bola-fiesta.gif";
 import { formatFechaTexto, formatHoraTexto } from "../lib/formatFecha";
+import { EditableText } from '@/shared/components/EditableText'
+import { EditableImagen } from '@/shared/components/EditableImagen'
+import { useEditable } from '@/shared/components/EditableContext'
 
 export default function EventInfo({
   fechaHoraISO = "2026-03-23T21:30:00",
@@ -11,19 +14,17 @@ export default function EventInfo({
   labelCuando = "¿CUÁNDO?",
   labelDonde = "¿DÓNDE?",
   botonComoLlegar = "CÓMO LLEGAR",
+  fotoCuando = calendarioGifDefault,
+  fotoDonde = bolaFiestaGifDefault,
 }) {
+  const { editable } = useEditable()
+
   return (
     <>
       <section className="section event-info event-info--when alignfull" data-aos="fade-up" data-aos-duration="600" data-aos-easing="ease-out" data-aos-once="true">
         <div className="info-card fade-up">
-          <img
-            className="info-card__gif"
-            src={calendarioGif}
-            alt=""
-            aria-hidden="true"
-          />
-
-          <h3 className="info-card__title">{labelCuando}</h3>
+          <EditableImagen path="fotoCuando" src={fotoCuando} alt="" className="info-card__gif" />
+          <EditableText path="textos.labelCuando" value={labelCuando} as="h3" className="info-card__title" />
           <p className="info-card__text">{formatFechaTexto(fechaHoraISO)}</p>
           <p className="info-card__text">
             | <strong>{formatHoraTexto(fechaHoraISO)}</strong> |
@@ -32,16 +33,17 @@ export default function EventInfo({
       </section>
          <section className="section event-info event-info--where alignfull" data-aos="fade-up" data-aos-duration="600" data-aos-easing="ease-out" data-aos-once="true">
         <div className="info-card fade-up">
-          <img className="info-card__gif" src={bolaFiestaGif} alt="" aria-hidden="true" />
-          <h3 className="info-card__title">{labelDonde}</h3>
-          <p className="info-card__text">{lugarNombre}</p>
+          <EditableImagen path="fotoDonde" src={fotoDonde} alt="" className="info-card__gif" />
+          <EditableText path="textos.labelDonde" value={labelDonde} as="h3" className="info-card__title" />
+          <EditableText path="evento.lugarNombre" value={lugarNombre} as="p" className="info-card__text" />
           <a
             className="info-card__btn"
             href={lugarMapsLink}
             target="_blank"
             rel="noreferrer"
+            onClick={(e) => { if (editable) e.preventDefault() }}
           >
-            {botonComoLlegar}
+            <EditableText path="textos.botonComoLlegar" value={botonComoLlegar} as="span" />
           </a>
         </div>
       </section>

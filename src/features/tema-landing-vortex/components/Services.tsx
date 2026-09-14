@@ -2,6 +2,9 @@ import { motion } from "framer-motion";
 import { useState, useRef } from "react";
 import { buildWhatsappUrl } from "../lib/whatsapp";
 import type { VortexConfig } from "../config";
+import { EditableText } from "@/shared/components/EditableText";
+import { EditableImagen } from "@/shared/components/EditableImagen";
+import { useEditable } from "@/shared/components/EditableContext";
 
 const ARROW_PATH =
   "M16.175 13H5C4.71667 13 4.47917 12.9042 4.2875 12.7125C4.09583 12.5208 4 12.2833 4 12C4 11.7167 4.09583 11.4792 4.2875 11.2875C4.47917 11.0958 4.71667 11 5 11H16.175L11.275 6.09999C11.075 5.89999 10.9792 5.66665 10.9875 5.39999C10.9958 5.13332 11.1 4.89999 11.3 4.69999C11.5 4.51665 11.7333 4.42082 12 4.41249C12.2667 4.40415 12.5 4.49999 12.7 4.69999L19.3 11.3C19.4 11.4 19.4708 11.5083 19.5125 11.625C19.5542 11.7417 19.575 11.8667 19.575 12C19.575 12.1333 19.5542 12.2583 19.5125 12.375C19.4708 12.4917 19.4 12.6 19.3 12.7L12.7 19.3C12.5167 19.4833 12.2875 19.575 12.0125 19.575C11.7375 19.575 11.5 19.4833 11.3 19.3C11.1 19.1 11 18.8625 11 18.5875C11 18.3125 11.1 18.075 11.3 17.875L16.175 13Z";
@@ -15,6 +18,7 @@ const BADGE_COLORES = ["var(--v-accent)", "#c9b6ff"];
 export default function Services({ config }: { config: VortexConfig }) {
   const [slide, setSlide] = useState(0);
   const { services } = config;
+  const { editable } = useEditable();
   const totalSlides = services.items.length;
   const touchStartX = useRef(0);
   const openWA = () => window.open(buildWhatsappUrl(config.whatsappNumero, config.whatsappMensaje), "_blank");
@@ -33,12 +37,18 @@ export default function Services({ config }: { config: VortexConfig }) {
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: "1120px", margin: "0 auto" }}>
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }} style={{ margin: "0 0 32px", textAlign: "center" }}>
-          <h3 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(26px, 5vw, 30px)", fontWeight: 700, letterSpacing: "-.01em", color: "var(--v-text)" }}>
-            {services.eyebrow}
-          </h3>
-          <p style={{ margin: "10px 0 0", fontFamily: "'Inter', sans-serif", fontSize: "16px", color: "color-mix(in srgb, var(--v-text) 55%, transparent)" }}>
-            {services.descripcion}
-          </p>
+          <EditableText
+            path="services.eyebrow"
+            value={services.eyebrow}
+            as="h3"
+            style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(26px, 5vw, 30px)", fontWeight: 700, letterSpacing: "-.01em", color: "var(--v-text)" }}
+          />
+          <EditableText
+            path="services.descripcion"
+            value={services.descripcion}
+            as="p"
+            style={{ margin: "10px 0 0", fontFamily: "'Inter', sans-serif", fontSize: "16px", color: "color-mix(in srgb, var(--v-text) 55%, transparent)" }}
+          />
         </motion.div>
 
         <div style={{ position: "relative" }}>
@@ -70,15 +80,30 @@ export default function Services({ config }: { config: VortexConfig }) {
                           <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "12px", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: badgeColor }}>
                             Servicio 0{index + 1}
                           </span>
-                          <h3 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 700, lineHeight: "1.15", letterSpacing: "-.01em", color: "var(--v-text)" }}>
-                            {servicio.titulo}
-                          </h3>
+                          <EditableText
+                            path={`services.items.${index}.titulo`}
+                            value={servicio.titulo}
+                            as="h3"
+                            style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 700, lineHeight: "1.15", letterSpacing: "-.01em", color: "var(--v-text)" }}
+                          />
                           <p style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: "clamp(14px, 1.2vw, 16px)", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 62%, transparent)" }}>
-                            <span style={{ color: "var(--v-accent)", fontWeight: 600 }}>{servicio.subtitulo}</span> {servicio.descripcion}
+                            <EditableText
+                              path={`services.items.${index}.subtitulo`}
+                              value={servicio.subtitulo}
+                              as="span"
+                              style={{ color: "var(--v-accent)", fontWeight: 600 }}
+                            />{" "}
+                            <EditableText
+                              path={`services.items.${index}.descripcion`}
+                              value={servicio.descripcion}
+                              as="span"
+                            />
                           </p>
                           <div className="hidden sm:block">
                             <button type="button" className="prod-btn" onClick={openWA}>
-                              {servicio.ctaLabel}
+                              <span onClick={(e) => editable && e.stopPropagation()}>
+                                <EditableText path={`services.items.${index}.ctaLabel`} value={servicio.ctaLabel} as="span" />
+                              </span>
                               <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0, animation: "arrowSlide 1.5s ease-in-out infinite" }}>
                                 <path d={ARROW_PATH} />
                               </svg>
@@ -88,15 +113,20 @@ export default function Services({ config }: { config: VortexConfig }) {
 
                         <div>
                           <div style={{ position: "relative", height: "clamp(220px, 55vw, 430px)", borderRadius: "18px", overflow: "hidden", border: "1px solid color-mix(in srgb, var(--v-text) 8%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, var(--v-card-1), var(--v-card-2))" }}>
-                            <video autoPlay loop muted playsInline style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", filter: "grayscale(.5) contrast(1.05) brightness(.78)" }}>
-                              <source src={servicio.video} type="video/webm" />
-                            </video>
-                            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, color-mix(in srgb, var(--v-accent) 20%, transparent), transparent 45%, rgba(124,58,237,.3))", mixBlendMode: "overlay" }} />
-                            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--v-bg) 50%, transparent))" }} />
+                            <EditableImagen
+                              path={`services.items.${index}.foto`}
+                              src={servicio.foto}
+                              alt=""
+                              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", filter: "grayscale(.5) contrast(1.05) brightness(.78)" }}
+                            />
+                            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, color-mix(in srgb, var(--v-accent) 20%, transparent), transparent 45%, rgba(124,58,237,.3))", mixBlendMode: "overlay", pointerEvents: "none" }} />
+                            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--v-bg) 50%, transparent))", pointerEvents: "none" }} />
                           </div>
                           <div className="sm:hidden" style={{ marginTop: "12px" }}>
                             <button type="button" className="prod-btn" onClick={openWA}>
-                              {servicio.ctaLabel}
+                              <span onClick={(e) => editable && e.stopPropagation()}>
+                                <EditableText path={`services.items.${index}.ctaLabel`} value={servicio.ctaLabel} as="span" />
+                              </span>
                               <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0, animation: "arrowSlide 1.5s ease-in-out infinite" }}>
                                 <path d={ARROW_PATH} />
                               </svg>

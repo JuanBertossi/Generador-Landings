@@ -9,7 +9,8 @@ import { usePaginaPersistida } from '@/shared/hooks/usePaginaPersistida'
 import { subirArchivo, eliminarArchivo } from '@/shared/lib/subirArchivo'
 import { linkWhatsappSoporte } from '@/shared/lib/contacto'
 import { urlPublicada, DOMINIO_BASE } from '@/shared/lib/dominio'
-import { Bookmark, CheckCircle2, Copy, Check, AlertCircle, Globe } from 'lucide-react'
+import { MobilePreviewFrame } from '@/shared/components/MobilePreviewFrame'
+import { Bookmark, CheckCircle2, Copy, Check, AlertCircle, Globe, Monitor, Smartphone } from 'lucide-react'
 
 function Field({ label, path, config, onChange, type = 'text', textarea = false }) {
   const value = getPath(config, path) ?? ''
@@ -50,6 +51,7 @@ export default function CrearInvitacionPage() {
   const [publicando, setPublicando] = useState(false)
   const [errorPublicar, setErrorPublicar] = useState(null)
   const [copiado, setCopiado] = useState(false)
+  const [vistaMobile, setVistaMobile] = useState(false)
   const linkEdicion = typeof window !== 'undefined' ? window.location.href : ''
 
   function handleCopiarLink() {
@@ -94,18 +96,16 @@ export default function CrearInvitacionPage() {
     setConfig((prev) => setPath(prev, path, value))
   }
 
-  function handleFotoChange(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const anterior = config.fotoPrincipal
-    setConfig((prev) => setPath(prev, 'fotoPrincipal', URL.createObjectURL(file)))
+  function handleArchivoGenerico(path, file) {
+    const anterior = getPath(config, path)
+    setConfig((prev) => setPath(prev, path, URL.createObjectURL(file)))
     subirArchivo(file)
       .then((url) => {
-        setConfig((prev) => setPath(prev, 'fotoPrincipal', url))
+        setConfig((prev) => setPath(prev, path, url))
         eliminarArchivo(anterior)
       })
       .catch(() => {
-        setConfig((prev) => setPath(prev, 'fotoPrincipal', anterior ?? ''))
+        setConfig((prev) => setPath(prev, path, anterior ?? ''))
         setErrorPublicar('No pudimos subir la foto. Probá de nuevo.')
       })
   }
@@ -145,9 +145,18 @@ export default function CrearInvitacionPage() {
   return (
     <div className="crear-invitacion">
       <div className="crear-invitacion__form">
+        <div className="crear-invitacion__vista-toggle">
+          <button type="button" className={vistaMobile ? '' : 'activo'} onClick={() => setVistaMobile(false)}>
+            <Monitor size={15} strokeWidth={2} /> Desktop
+          </button>
+          <button type="button" className={vistaMobile ? 'activo' : ''} onClick={() => setVistaMobile(true)}>
+            <Smartphone size={15} strokeWidth={2} /> Mobile
+          </button>
+        </div>
+
         <h1>Armá tu invitación</h1>
         <p>
-          Vas viendo el resultado a la derecha, en tiempo real.
+          Vas viendo el resultado a la derecha, en tiempo real. Hacé clic sobre cualquier texto o foto de la vista previa para editarlo directamente.
           {cargando ? ' Cargando tu página…' : guardando ? ' Guardando…' : ' Guardado.'}
         </p>
         {!cargando && (
@@ -160,8 +169,6 @@ export default function CrearInvitacionPage() {
         <fieldset className="crear-invitacion__fieldset">
           <legend>Quién festeja</legend>
           <Field label="Nombre" path="anfitrion.nombre" config={config} onChange={handleChange} />
-          <Field label="Texto arriba del nombre (ej: 15 AÑOS, SE CASAN)" path="anfitrion.eyebrow" config={config} onChange={handleChange} />
-          <Field label="Título grande de la sección central" path="tituloDestacado" config={config} onChange={handleChange} textarea />
         </fieldset>
 
         <fieldset className="crear-invitacion__fieldset">
@@ -181,13 +188,7 @@ export default function CrearInvitacionPage() {
               onChange={(e) => handleChange('evento.fechaHoraISO', e.target.value)}
             />
           </div>
-          <Field label="Lugar" path="evento.lugarNombre" config={config} onChange={handleChange} />
           <Field label="Link de Google Maps" path="evento.lugarMapsLink" config={config} onChange={handleChange} />
-        </fieldset>
-
-        <fieldset className="crear-invitacion__fieldset">
-          <legend>Frase</legend>
-          <Field label="Cita/frase" path="frase" config={config} onChange={handleChange} textarea />
         </fieldset>
 
         <fieldset className="crear-invitacion__fieldset">
@@ -213,18 +214,10 @@ export default function CrearInvitacionPage() {
         </fieldset>
 
         <fieldset className="crear-invitacion__fieldset">
-          <legend>Textos de botones y secciones</legend>
+          <legend>Textos que no se ven en la vista previa</legend>
           <Field label="Botón para entrar a la invitación" path="textos.botonIngresar" config={config} onChange={handleChange} />
-          <Field label="Título '¿Cuándo?'" path="textos.labelCuando" config={config} onChange={handleChange} />
-          <Field label="Título '¿Dónde?'" path="textos.labelDonde" config={config} onChange={handleChange} />
-          <Field label="Botón 'cómo llegar'" path="textos.botonComoLlegar" config={config} onChange={handleChange} />
-          <Field label="Título de confirmación de asistencia" path="textos.labelConfirmar" config={config} onChange={handleChange} />
-          <Field label="Botón para ver el valor de entrada" path="textos.botonVerValor" config={config} onChange={handleChange} />
-          <Field label="Botón para confirmar por WhatsApp" path="textos.botonVoyAsistir" config={config} onChange={handleChange} />
-          <Field label="Botón para avisar que no va a poder ir" path="textos.botonNoAsistir" config={config} onChange={handleChange} />
           <Field label="Título del cuadro de precios" path="textos.tituloValorTarjeta" config={config} onChange={handleChange} />
           <Field label="Nota sobre la forma de pago" path="textos.notaPago" config={config} onChange={handleChange} textarea />
-          <Field label="Título del pie de página final" path="footer.titulo" config={config} onChange={handleChange} />
         </fieldset>
 
         <fieldset className="crear-invitacion__fieldset">
@@ -249,13 +242,6 @@ export default function CrearInvitacionPage() {
           <button type="button" className="crear-invitacion__btn-agregar" onClick={agregarPrecio}>
             + Agregar categoría
           </button>
-        </fieldset>
-
-        <fieldset className="crear-invitacion__fieldset">
-          <legend>Foto principal</legend>
-          <div className="crear-invitacion__field">
-            <input type="file" accept="image/*" onChange={handleFotoChange} />
-          </div>
         </fieldset>
 
         <div className="crear-invitacion__subdominio">
@@ -302,9 +288,23 @@ export default function CrearInvitacionPage() {
       </div>
 
       <div className="crear-invitacion__preview">
-        <div className="crear-invitacion__preview-frame">
-          <InvitacionPage config={config} saltarBienvenida />
-        </div>
+        {vistaMobile ? (
+          <div className="crear-invitacion__preview-mobile-wrap">
+            <MobilePreviewFrame>
+              <InvitacionPage config={config} saltarBienvenida />
+            </MobilePreviewFrame>
+          </div>
+        ) : (
+          <div className="crear-invitacion__preview-frame">
+            <InvitacionPage
+              config={config}
+              saltarBienvenida
+              editable
+              onFieldChange={handleChange}
+              onArchivoChange={handleArchivoGenerico}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

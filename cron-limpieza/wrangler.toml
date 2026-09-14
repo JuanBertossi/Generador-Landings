@@ -1,7 +1,0 @@
-name = "limpieza-generador-landing"
-main = "index.js"
-compatibility_date = "2026-01-01"
-
-# Corre todos los días a las 6:00 UTC (3:00 AM Argentina), horario de bajo tráfico.
-[triggers]
-crons = ["0 6 * * *"]

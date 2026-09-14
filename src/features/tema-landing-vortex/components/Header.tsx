@@ -2,9 +2,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { buildWhatsappUrl } from "../lib/whatsapp";
 import type { VortexConfig } from "../config";
+import { useEditable } from "@/shared/components/EditableContext";
+import { EditableText } from "@/shared/components/EditableText";
+import { EditableImagen } from "@/shared/components/EditableImagen";
 
 function AnimatedBanner({ texto }: { texto: string }) {
-  if (!texto) return null;
+  const { editable } = useEditable();
+  if (!texto && !editable) return null;
   return (
     <div className="overflow-hidden whitespace-nowrap py-[7px] relative z-[60] bg-gradient-to-r from-[#7c3aed] via-[#a855f7] to-[#7c3aed]">
       <div className="inline-flex items-center gap-0 animate-marquee">
@@ -13,7 +17,11 @@ function AnimatedBanner({ texto }: { texto: string }) {
             key={i}
             className="inline-flex items-center gap-[14px] pr-[14px] text-[13px] font-semibold text-white"
           >
-            {texto}
+            {i === 0 ? (
+              <EditableText path="bannerTexto" value={texto} as="span" multiline={false} />
+            ) : (
+              texto
+            )}
           </span>
         ))}
       </div>
@@ -22,6 +30,7 @@ function AnimatedBanner({ texto }: { texto: string }) {
 }
 
 export default function Header({ config }: { config: VortexConfig }) {
+  const { editable } = useEditable();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const scrollToSection = (id: string) => {
@@ -78,8 +87,9 @@ export default function Header({ config }: { config: VortexConfig }) {
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
           >
-            {config.identidad.logoUrl ? (
-              <img
+            {(config.identidad.logoUrl || editable) ? (
+              <EditableImagen
+                path="identidad.logoUrl"
                 src={config.identidad.logoUrl}
                 alt={config.identidad.nombreEmpresa}
                 className="h-[44px] w-auto block"
@@ -96,7 +106,7 @@ export default function Header({ config }: { config: VortexConfig }) {
           </motion.a>
 
           <div className="hidden md:flex items-center gap-[34px]">
-            {config.navLinks.map((item) => (
+            {config.navLinks.map((item, index) => (
               <a
                 key={item.href}
                 href={`#${item.href}`}
@@ -112,7 +122,9 @@ export default function Header({ config }: { config: VortexConfig }) {
                   e.currentTarget.style.textShadow = "none";
                 }}
               >
-                {item.label}
+                <span onClick={(e) => editable && e.stopPropagation()}>
+                  <EditableText path={`navLinks.${index}.label`} value={item.label} as="span" />
+                </span>
               </a>
             ))}
           </div>
@@ -122,7 +134,9 @@ export default function Header({ config }: { config: VortexConfig }) {
             className="gbtn hidden sm:block px-[22px] py-[9px] rounded-full border-none cursor-pointer font-bricolage text-[14px] font-bold"
             onClick={() => window.open(waLink, "_blank")}
           >
-            {config.navCtaLabel}
+            <span onClick={(e) => editable && e.stopPropagation()}>
+              <EditableText path="navCtaLabel" value={config.navCtaLabel} as="span" />
+            </span>
           </button>
 
           <button
@@ -168,7 +182,9 @@ export default function Header({ config }: { config: VortexConfig }) {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.07, duration: 0.25 }}
                   >
-                    {item.label}
+                    <span onClick={(e) => editable && e.stopPropagation()}>
+                      <EditableText path={`navLinks.${index}.label`} value={item.label} as="span" />
+                    </span>
                   </motion.a>
                 ))}
                 <motion.button
@@ -182,7 +198,9 @@ export default function Header({ config }: { config: VortexConfig }) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.32, duration: 0.25 }}
                 >
-                  {config.navCtaLabel}
+                  <span onClick={(e) => editable && e.stopPropagation()}>
+                    <EditableText path="navCtaLabel" value={config.navCtaLabel} as="span" />
+                  </span>
                 </motion.button>
               </div>
             </motion.div>

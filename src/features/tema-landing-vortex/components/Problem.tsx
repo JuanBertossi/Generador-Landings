@@ -3,9 +3,12 @@ import { buildWhatsappUrl } from "../lib/whatsapp";
 import { textoConEnfasis } from "../lib/textoConEnfasis";
 import { getIcono } from "../lib/iconos";
 import type { VortexConfig } from "../config";
+import { useEditable } from "@/shared/components/EditableContext";
+import { EditableText } from "@/shared/components/EditableText";
 
 export default function Problem({ config }: { config: VortexConfig }) {
   const { problem } = config;
+  const { editable } = useEditable();
   const waLink = buildWhatsappUrl(config.whatsappNumero, config.whatsappMensaje);
 
   return (
@@ -20,7 +23,12 @@ export default function Problem({ config }: { config: VortexConfig }) {
             style={{ display: "inline-flex", alignItems: "center", gap: "9px", marginBottom: "16px" }}
           >
             <span style={{ fontSize: "13px", fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "#c9b6ff" }}>
-              {problem.eyebrow}
+              <EditableText
+                path="problem.eyebrow"
+                value={problem.eyebrow}
+                as="span"
+                style={{ fontSize: "13px", fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "#c9b6ff" }}
+              />
             </span>
           </motion.div>
 
@@ -39,7 +47,22 @@ export default function Problem({ config }: { config: VortexConfig }) {
               color: "var(--v-text)",
             }}
           >
-            {textoConEnfasis(problem.titulo)}
+            <EditableText
+              path="problem.titulo"
+              value={problem.titulo}
+              as="h2"
+              multiline
+              render={textoConEnfasis}
+              style={{
+                margin: "0 0 14px",
+                fontFamily: "'Bricolage Grotesque', sans-serif",
+                fontSize: "clamp(32px, 5vw, 44px)",
+                fontWeight: 700,
+                letterSpacing: "-.02em",
+                lineHeight: "1.1",
+                color: "var(--v-text)",
+              }}
+            />
           </motion.h2>
 
           <motion.p
@@ -56,7 +79,20 @@ export default function Problem({ config }: { config: VortexConfig }) {
               color: "var(--v-text)",
             }}
           >
-            {problem.descripcion}
+            <EditableText
+              path="problem.descripcion"
+              value={problem.descripcion}
+              as="p"
+              multiline
+              style={{
+                margin: "0 auto",
+                maxWidth: "720px",
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "clamp(15px, 1.2vw, 17px)",
+                lineHeight: "1.7",
+                color: "var(--v-text)",
+              }}
+            />
           </motion.p>
         </div>
 
@@ -100,12 +136,19 @@ export default function Problem({ config }: { config: VortexConfig }) {
                   >
                     <Icono size={26} />
                   </div>
-                  <h3 style={{ margin: "0 0 12px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "22px", fontWeight: 700, letterSpacing: "-.01em", color: "var(--v-text)" }}>
-                    {feature.titulo}
-                  </h3>
-                  <p style={{ margin: 0, fontSize: "15px", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 60%, transparent)" }}>
-                    {feature.descripcion}
-                  </p>
+                  <EditableText
+                    path={`problem.items.${index}.titulo`}
+                    value={feature.titulo}
+                    as="h3"
+                    style={{ margin: "0 0 12px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "22px", fontWeight: 700, letterSpacing: "-.01em", color: "var(--v-text)" }}
+                  />
+                  <EditableText
+                    path={`problem.items.${index}.descripcion`}
+                    value={feature.descripcion}
+                    as="p"
+                    multiline
+                    style={{ margin: 0, fontSize: "15px", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 60%, transparent)" }}
+                  />
                 </div>
               </motion.div>
             );
@@ -134,10 +177,21 @@ export default function Problem({ config }: { config: VortexConfig }) {
                       <Icono size={26} />
                     </div>
                     <h3 style={{ margin: "0 0 12px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "22px", fontWeight: 700, letterSpacing: "-.01em", color: "var(--v-text)" }}>
-                      {feature.titulo}
+                      <EditableText
+                        path={`problem.items.${index}.titulo`}
+                        value={feature.titulo}
+                        as="h3"
+                        style={{ margin: "0 0 12px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "22px", fontWeight: 700, letterSpacing: "-.01em", color: "var(--v-text)" }}
+                      />
                     </h3>
                     <p style={{ margin: 0, fontSize: "15px", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 60%, transparent)" }}>
-                      {feature.descripcion}
+                      <EditableText
+                        path={`problem.items.${index}.descripcion`}
+                        value={feature.descripcion}
+                        as="p"
+                        multiline
+                        style={{ margin: 0, fontSize: "15px", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 60%, transparent)" }}
+                      />
                     </p>
                   </div>
                 </div>
@@ -168,7 +222,9 @@ export default function Problem({ config }: { config: VortexConfig }) {
             }}
             onClick={() => window.open(waLink, "_blank")}
           >
-            {problem.ctaLabel}
+            <span onClick={(e) => editable && e.stopPropagation()}>
+              <EditableText path="problem.ctaLabel" value={problem.ctaLabel} as="span" />
+            </span>
           </button>
         </motion.div>
       </div>

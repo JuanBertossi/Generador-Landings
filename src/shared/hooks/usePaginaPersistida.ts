@@ -41,7 +41,11 @@ export function usePaginaPersistida<T>(tema: Tema, configInicial: T, rutaBase: s
       const { data, error: err } = await supabase.rpc('crear_pagina', { p_tema: tema, p_data: configInicial as object })
       if (cancelado) return
       if (err || !data || data.length === 0) {
-        setError('No pudimos empezar tu página. Probá de nuevo en un momento.')
+        // P0001 = "raise exception" nuestro del lado de la función SQL (ej:
+        // límite de páginas por IP) — ese mensaje ya está escrito para que
+        // lo lea la persona, se muestra tal cual. Cualquier otro error
+        // (conexión, etc.) usa el mensaje genérico de siempre.
+        setError(err?.code === 'P0001' && err.message ? err.message : 'No pudimos empezar tu página. Probá de nuevo en un momento.')
         setCargando(false)
         return
       }

@@ -11,8 +11,16 @@ import { FaMoneyBillWave } from 'react-icons/fa'
 import { invitacionDefaultConfig } from './config.js'
 import { useProteccionBasica } from '@/shared/hooks/useProteccionBasica'
 import { derivarPaleta } from './lib/paletaDerivada'
+import { EditableProvider } from '@/shared/components/EditableContext'
 
-export default function InvitacionPage({ config = invitacionDefaultConfig, saltarBienvenida = false, paginaId = null }) {
+export default function InvitacionPage({
+  config = invitacionDefaultConfig,
+  saltarBienvenida = false,
+  paginaId = null,
+  editable = false,
+  onFieldChange,
+  onArchivoChange,
+}) {
   const [entered, setEntered] = useState(saltarBienvenida)
   const [priceOpen, setPriceOpen] = useState(false)
   const proteccionRef = useProteccionBasica()
@@ -26,73 +34,88 @@ export default function InvitacionPage({ config = invitacionDefaultConfig, salta
   const coloresPersonalizados = derivarPaleta(config.apariencia)
 
   return (
-    <div className="invitacion-root" ref={proteccionRef} style={coloresPersonalizados}>
-      {!entered && (
-        <WelcomeScreen
-          onEnter={() => setEntered(true)}
-          eyebrow={config.anfitrion.eyebrow}
-          nombre={config.anfitrion.nombre}
-          subtitulo={config.bienvenida.subtitulo}
-          youtubeVideoId={config.bienvenida.youtubeVideoId}
-          botonIngresar={config.textos.botonIngresar}
-        />
-      )}
-      {entered && (
-        <>
-          <Hero
+    <EditableProvider
+      value={{
+        editable,
+        onChange: onFieldChange ?? (() => {}),
+        onArchivoChange: onArchivoChange ?? (() => {}),
+        onAgregarFaq: () => {},
+        onQuitarFaq: () => {},
+        onAgregarContactoBullet: () => {},
+        onQuitarContactoBullet: () => {},
+      }}
+    >
+      <div className="invitacion-root" ref={proteccionRef} style={coloresPersonalizados}>
+        {!entered && (
+          <WelcomeScreen
+            onEnter={() => setEntered(true)}
             eyebrow={config.anfitrion.eyebrow}
             nombre={config.anfitrion.nombre}
-            fechaHoraISO={config.evento.fechaHoraISO}
-            fotoPrincipal={config.fotoPrincipal}
+            subtitulo={config.bienvenida.subtitulo}
+            youtubeVideoId={config.bienvenida.youtubeVideoId}
+            botonIngresar={config.textos.botonIngresar}
           />
-          <EventInfo
-            fechaHoraISO={config.evento.fechaHoraISO}
-            lugarNombre={config.evento.lugarNombre}
-            lugarMapsLink={config.evento.lugarMapsLink}
-            labelCuando={config.textos.labelCuando}
-            labelDonde={config.textos.labelDonde}
-            botonComoLlegar={config.textos.botonComoLlegar}
-          />
-          <BirthdaySection
-            tituloDestacado={config.tituloDestacado}
-            fotoPrincipal={config.fotoPrincipal}
-          />
-          <Quote texto={config.frase} />
-          <RSVP
-            onOpenPrices={() => setPriceOpen(true)}
-            nombre={config.anfitrion.nombre}
-            telefonoWhatsapp={config.rsvp.telefonoWhatsapp}
-            mensajePlantilla={config.rsvp.mensajePlantilla}
-            fechaLimiteISO={config.rsvp.fechaLimiteISO}
-            labelConfirmar={config.textos.labelConfirmar}
-            botonVerValor={config.textos.botonVerValor}
-            botonVoyAsistir={config.textos.botonVoyAsistir}
-            botonNoAsistir={config.textos.botonNoAsistir}
-            paginaId={paginaId}
-          />
-          <Footer titulo={config.footer.titulo} />
+        )}
+        {entered && (
+          <>
+            <Hero
+              eyebrow={config.anfitrion.eyebrow}
+              nombre={config.anfitrion.nombre}
+              fechaHoraISO={config.evento.fechaHoraISO}
+              fotoPrincipal={config.fotoPrincipal}
+            />
+            <EventInfo
+              fechaHoraISO={config.evento.fechaHoraISO}
+              lugarNombre={config.evento.lugarNombre}
+              lugarMapsLink={config.evento.lugarMapsLink}
+              labelCuando={config.textos.labelCuando}
+              labelDonde={config.textos.labelDonde}
+              botonComoLlegar={config.textos.botonComoLlegar}
+              fotoCuando={config.fotoCuando}
+              fotoDonde={config.fotoDonde}
+            />
+            <BirthdaySection
+              tituloDestacado={config.tituloDestacado}
+              fotoPrincipal={config.fotoPrincipal}
+            />
+            <Quote texto={config.frase} />
+            <RSVP
+              onOpenPrices={() => setPriceOpen(true)}
+              nombre={config.anfitrion.nombre}
+              telefonoWhatsapp={config.rsvp.telefonoWhatsapp}
+              mensajePlantilla={config.rsvp.mensajePlantilla}
+              fechaLimiteISO={config.rsvp.fechaLimiteISO}
+              labelConfirmar={config.textos.labelConfirmar}
+              botonVerValor={config.textos.botonVerValor}
+              botonVoyAsistir={config.textos.botonVoyAsistir}
+              botonNoAsistir={config.textos.botonNoAsistir}
+              fotoMensaje={config.rsvp.fotoMensaje}
+              paginaId={paginaId}
+            />
+            <Footer titulo={config.footer.titulo} fotoFondo={config.footer.fotoFondo} />
 
-          {priceOpen && (
-            <div className="modal-overlay" onClick={() => setPriceOpen(false)}>
-              <div className="modal-box" onClick={e => e.stopPropagation()}>
-                <button className="modal-close" onClick={() => setPriceOpen(false)}>✕</button>
-                <h5 className="price-modal__title">{config.textos.tituloValorTarjeta}</h5>
-                <ul className="price-modal__list">
-                  {config.precios.map(({ categoria, precio }) => (
-                    <li key={categoria}>
-                      <span className="price-modal__cat">{categoria}</span>
-                      <strong className="price-modal__price">{precio}</strong>
-                    </li>
-                  ))}
-                </ul>
-                <p className="price-modal__note">
-                  <FaMoneyBillWave aria-hidden="true" /> {config.textos.notaPago}
-                </p>
+            {priceOpen && (
+              <div className="modal-overlay" onClick={() => setPriceOpen(false)}>
+                <div className="modal-box" onClick={e => e.stopPropagation()}>
+                  <button className="modal-close" onClick={() => setPriceOpen(false)}>✕</button>
+                  <h5 className="price-modal__title">{config.textos.tituloValorTarjeta}</h5>
+                  <ul className="price-modal__list">
+                    {config.precios.map(({ categoria, precio }) => (
+                      <li key={categoria}>
+                        <span className="price-modal__cat">{categoria}</span>
+                        <strong className="price-modal__price">{precio}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="price-modal__note">
+                    <FaMoneyBillWave aria-hidden="true" /> {config.textos.notaPago}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+            )}
+          </>
+        )}
+      </div>
+    </EditableProvider>
   )
 }

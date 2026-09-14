@@ -1,12 +1,15 @@
-import { ArrowRight, Check } from 'lucide-react'
+import { ArrowRight, Check, X } from 'lucide-react'
 import { Reveal } from '@/features/tema-landing-fleepix/shared/components/Reveal'
 import { BgGridCanvas } from './BgGridCanvas'
 import { useContactForm } from '../hooks/useContactForm'
 import type { LandingFleepixConfig } from '../config'
+import { EditableText } from '@/shared/components/EditableText'
+import { useEditable } from '@/shared/components/EditableContext'
 
 export function ContactForm({ config, paginaId = null }: { config: LandingFleepixConfig; paginaId?: string | null }) {
   const { register, onSubmit, formState: { errors }, sent } = useContactForm(config.whatsappNumero, paginaId)
   const { contactoSeccion } = config
+  const { editable, onAgregarContactoBullet, onQuitarContactoBullet } = useEditable()
 
   return (
     <section className="relative overflow-hidden py-24 max-[900px]:py-18 max-[480px]:py-[54px]" id="demo">
@@ -18,18 +21,45 @@ export function ContactForm({ config, paginaId = null }: { config: LandingFleepi
             index={0}
             className="bg-[var(--neutro-100)] border border-[var(--border)] rounded-[14px] px-11 py-12 flex flex-col justify-center max-[900px]:px-[26px] max-[900px]:py-8 max-[480px]:px-5 max-[480px]:py-[26px]"
           >
-            <span className="inline-block font-['Sora'] font-bold text-[12.5px] text-[var(--verde-600)] tracking-[0.14em] mb-[14px]">{contactoSeccion.eyebrow}</span>
-            <h2 className="font-['Sora'] font-bold text-[clamp(28px,3vw,40px)] leading-[1.08] tracking-[-0.02em] text-[var(--navy-500)] mb-[18px] text-balance">{contactoSeccion.titulo}</h2>
-            <p className="text-[var(--text-soft)] text-base leading-[1.6] max-w-[38ch]">{contactoSeccion.descripcion}</p>
+            <span className="inline-block font-['Sora'] font-bold text-[12.5px] text-[var(--verde-600)] tracking-[0.14em] mb-[14px]">
+              <EditableText path="contactoSeccion.eyebrow" value={contactoSeccion.eyebrow} as="span" />
+            </span>
+            <h2 className="font-['Sora'] font-bold text-[clamp(28px,3vw,40px)] leading-[1.08] tracking-[-0.02em] text-[var(--navy-500)] mb-[18px] text-balance">
+              <EditableText path="contactoSeccion.titulo" value={contactoSeccion.titulo} as="span" />
+            </h2>
+            <p className="text-[var(--text-soft)] text-base leading-[1.6] max-w-[38ch]">
+              <EditableText path="contactoSeccion.descripcion" value={contactoSeccion.descripcion} as="span" multiline />
+            </p>
             <ul className="list-none mt-[30px] p-0 flex flex-col gap-[14px]">
-              {contactoSeccion.bullets.map((bullet) => (
-                <li key={bullet} className="flex items-center gap-[11px] font-['Sora'] text-[14.5px] font-medium text-[var(--navy-500)]">
+              {contactoSeccion.bullets.map((bullet, i) => (
+                <li key={i} className="flex items-center gap-[11px] font-['Sora'] text-[14.5px] font-medium text-[var(--navy-500)]">
                   <span className="w-6 h-6 flex-none rounded-[var(--r-sm)] bg-[color-mix(in_srgb,var(--verde-500)_18%,transparent)] border border-[color-mix(in_srgb,var(--verde-500)_30%,transparent)] flex items-center justify-center text-[var(--verde-600)]">
                     <Check size={14} strokeWidth={3} />
                   </span>
-                  {bullet}
+                  <EditableText path={`contactoSeccion.bullets.${i}`} value={bullet} as="span" />
+                  {editable && (
+                    <button
+                      type="button"
+                      aria-label="Quitar punto"
+                      className="flex-none w-5 h-5 rounded-full flex items-center justify-center text-[var(--text-faint)] hover:text-[#c0392b]"
+                      onClick={() => onQuitarContactoBullet(i)}
+                    >
+                      <X size={12} strokeWidth={2.4} />
+                    </button>
+                  )}
                 </li>
               ))}
+              {editable && (
+                <li>
+                  <button
+                    type="button"
+                    className="text-[13px] font-['Sora'] font-semibold text-[var(--verde-600)] cursor-pointer bg-transparent border border-dashed border-[var(--border)] rounded-[var(--r-sm)] px-3 py-1.5 hover:border-[var(--verde-600)]"
+                    onClick={onAgregarContactoBullet}
+                  >
+                    + Agregar punto
+                  </button>
+                </li>
+              )}
             </ul>
           </Reveal>
           <Reveal
@@ -38,7 +68,9 @@ export function ContactForm({ config, paginaId = null }: { config: LandingFleepi
             className="bg-[var(--neutro-100)] border border-[var(--border)] rounded-[14px] p-10 shadow-[0_18px_50px_rgba(0,37,52,0.08)] max-[480px]:px-[18px] max-[480px]:py-6"
           >
             {sent ? (
-              <p className="font-['Sora'] text-[17px] font-semibold text-[var(--navy-500)] text-center py-6">{contactoSeccion.mensajeExito}</p>
+              <p className="font-['Sora'] text-[17px] font-semibold text-[var(--navy-500)] text-center py-6">
+                <EditableText path="contactoSeccion.mensajeExito" value={contactoSeccion.mensajeExito} as="span" />
+              </p>
             ) : (
               <form onSubmit={onSubmit}>
                 <div className="grid grid-cols-2 gap-4 mb-4 max-[900px]:grid-cols-1">
@@ -68,8 +100,10 @@ export function ContactForm({ config, paginaId = null }: { config: LandingFleepi
                   />
                   {errors.mensaje && <span className="font-['Inter'] text-[12.5px] text-[#c0392b]">{errors.mensaje.message}</span>}
                 </div>
-                <button type="submit" className="inline-flex items-center justify-center gap-[9px] font-['Inter'] font-semibold text-[15.5px] cursor-pointer rounded-xl p-[13px] border border-transparent transition-[transform,background,border-color,box-shadow] duration-150 whitespace-nowrap bg-[var(--accent)] text-[var(--accent-ink)] shadow-[0_6px_22px_color-mix(in_srgb,var(--accent)_28%,transparent)] hover:-translate-y-px hover:bg-[var(--azul-400)] hover:shadow-[0_8px_26px_color-mix(in_srgb,var(--accent)_38%,transparent)] w-full mt-[6px]">
-                  {contactoSeccion.botonEnviar}
+                <button type="submit" className="inline-flex items-center justify-center gap-[9px] font-['Inter'] font-semibold text-[15.5px] cursor-pointer rounded-xl p-[13px] border border-transparent transition-[transform,background,border-color,box-shadow] duration-150 whitespace-nowrap bg-[var(--accent)] text-[var(--accent-ink)] shadow-[0_6px_22px_color-mix(in_srgb,var(--accent)_28%,transparent)] hover:-translate-y-px hover:bg-[var(--azul-400)] hover:shadow-[0_8px_26px_color-mix(in_srgb,var(--accent)_38%,transparent)] w-full mt-[6px]" style={{ color: 'var(--accent-ink)' }}>
+                  <span onClick={(e) => editable && e.stopPropagation()}>
+                    <EditableText path="contactoSeccion.botonEnviar" value={contactoSeccion.botonEnviar} as="span" />
+                  </span>
                   <ArrowRight className="w-[19px] h-[19px] flex-none" strokeWidth={2.4} />
                 </button>
               </form>

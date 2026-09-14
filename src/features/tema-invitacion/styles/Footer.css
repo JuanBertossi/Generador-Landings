@@ -1,11 +1,14 @@
 .footer {
   background: var(--color-primary);
   color: #fff;
-  height: 200px;
+  /* min-height (no height fijo): el título es editable inline, un texto
+     largo no debe desbordarse fuera de la caja. */
+  min-height: 200px;
   border-top: 20px solid #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 
 .footer__eyebrow {

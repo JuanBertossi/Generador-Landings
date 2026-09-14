@@ -4,21 +4,23 @@ import { buildWhatsappUrl } from '@/features/tema-landing-fleepix/shared/lib/wha
 import type { LandingFleepixConfig } from '../config'
 import { EditableText } from '@/shared/components/EditableText'
 import { EditableImagen } from '@/shared/components/EditableImagen'
+import { useEditable } from '@/shared/components/EditableContext'
 
 export function Navbar({ config }: { config: LandingFleepixConfig }) {
   const [open, setOpen] = useState(false)
+  const { editable } = useEditable()
   const ctaUrl = buildWhatsappUrl(config.whatsappNumero, config.whatsappMensajeDemo)
 
   return (
     <nav className="fixed top-[14px] inset-x-0 z-[100] px-4 max-[480px]:px-3">
       <div className="max-w-[var(--maxw)] mx-auto pl-[22px] pr-4 h-16 flex items-center justify-between gap-6 bg-[var(--navy-500)] border border-[var(--navy-600)] rounded-[14px] shadow-[0_10px_28px_rgba(0,17,23,0.2),0_2px_8px_rgba(0,17,23,0.14)]">
         <a className="flex items-center" href="#inicio" aria-label={config.identidad.nombreEmpresa}>
-          {config.identidad.logoUrl ? (
+          {config.identidad.logoUrl || editable ? (
             <EditableImagen
               path="identidad.logoUrl"
               src={config.identidad.logoUrl}
               alt={config.identidad.nombreEmpresa}
-              className="h-6 w-auto block"
+              className="h-6 w-auto min-w-[56px] block"
             />
           ) : (
             <FleepixLogo variant="light" className="h-6 w-auto block" />
@@ -30,6 +32,7 @@ export function Navbar({ config }: { config: LandingFleepixConfig }) {
               key={link.href}
               href={link.href}
               className="text-[var(--navy-200)] text-sm font-medium transition-colors duration-150 hover:text-[var(--azul-300)]"
+              style={{ color: 'var(--navy-200)' }}
             >
               <EditableText path={`navLinks.${i}.label`} value={link.label} as="span" />
             </a>
@@ -38,6 +41,7 @@ export function Navbar({ config }: { config: LandingFleepixConfig }) {
         <div className="flex items-center gap-3">
           <a
             className="inline-flex items-center justify-center gap-[9px] font-['Inter'] font-semibold text-[14.5px] cursor-pointer rounded-xl px-[22px] py-[10px] border border-transparent transition-[transform,background,border-color,box-shadow] duration-150 whitespace-nowrap bg-[var(--accent)] text-[var(--accent-ink)] shadow-[0_6px_22px_color-mix(in_srgb,var(--accent)_28%,transparent)] hover:-translate-y-px hover:bg-[var(--azul-400)] hover:shadow-[0_8px_26px_color-mix(in_srgb,var(--accent)_38%,transparent)] max-[480px]:hidden"
+            style={{ color: 'var(--accent-ink)' }}
             href={ctaUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -68,12 +72,14 @@ export function Navbar({ config }: { config: LandingFleepixConfig }) {
             href={link.href}
             onClick={() => setOpen(false)}
             className="text-[var(--neutro-100)] font-['Sora'] text-[15px] font-medium px-[14px] py-3 rounded-lg transition-colors duration-150 hover:bg-[var(--navy-600)] hover:text-[var(--azul-300)]"
+            style={{ color: 'var(--neutro-100)' }}
           >
             <EditableText path={`navLinks.${i}.label`} value={link.label} as="span" />
           </a>
         ))}
         <a
           className="inline-flex items-center justify-center gap-[9px] font-['Sora'] font-medium text-[15px] cursor-pointer rounded-lg px-[14px] py-3 border border-transparent transition-[transform,background,border-color,box-shadow] duration-150 whitespace-nowrap bg-[var(--accent)] text-[var(--accent-ink)] shadow-[0_6px_22px_color-mix(in_srgb,var(--accent)_28%,transparent)] hover:-translate-y-px hover:bg-[var(--azul-400)] hover:shadow-[0_8px_26px_color-mix(in_srgb,var(--accent)_38%,transparent)] mt-[6px]"
+          style={{ color: 'var(--accent-ink)' }}
           href={ctaUrl}
           target="_blank"
           rel="noopener noreferrer"

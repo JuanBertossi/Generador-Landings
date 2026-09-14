@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import './styles/CrearLandingVortex.css'
 import VortexPage from './views/VortexPage'
 import { vortexBlankConfig, type VortexConfig } from './config'
@@ -10,9 +10,21 @@ import { usePaginaPersistida } from '@/shared/hooks/usePaginaPersistida'
 import { subirArchivo, eliminarArchivo } from '@/shared/lib/subirArchivo'
 import { urlPublicada, DOMINIO_BASE } from '@/shared/lib/dominio'
 import { linkWhatsappSoporte } from '@/shared/lib/contacto'
-import { Bookmark, CheckCircle2, Copy, Check, AlertCircle, Globe } from 'lucide-react'
+import { MobilePreviewFrame } from '@/shared/components/MobilePreviewFrame'
+import { Bookmark, CheckCircle2, Copy, Check, AlertCircle, Globe, Monitor, Smartphone } from 'lucide-react'
 
 const OPCIONES_ICONO = Object.keys(ICONOS)
+
+const SECCIONES: { key: keyof NonNullable<VortexConfig['secciones']>; label: string }[] = [
+  { key: 'beneficios', label: 'Beneficios' },
+  { key: 'soluciones', label: 'Soluciones (productos)' },
+  { key: 'servicios', label: 'Servicios' },
+  { key: 'comoEmpezar', label: 'Cómo empezar' },
+  { key: 'beneficiosExtra', label: 'Beneficios (segundo bloque)' },
+  { key: 'casos', label: 'Casos de éxito' },
+  { key: 'preguntas', label: 'Preguntas frecuentes' },
+  { key: 'ctaFinal', label: 'CTA final' },
+]
 
 function Field({
   label,
@@ -63,30 +75,6 @@ function CampoColor({
   )
 }
 
-function CampoArchivo({
-  label,
-  path,
-  onArchivoChange,
-}: {
-  label: string
-  path: string
-  onArchivoChange: (path: string, file: File) => void
-}) {
-  return (
-    <div className="crear-vortex__field">
-      <label>{label}</label>
-      <input
-        type="file"
-        accept="image/*,video/*"
-        onChange={(e) => {
-          const file = e.target.files?.[0]
-          if (file) onArchivoChange(path, file)
-        }}
-      />
-    </div>
-  )
-}
-
 export default function CrearLandingVortexPage() {
   const { config, setConfig, cargando, guardando, error, publicar } = usePaginaPersistida(
     'landing-vortex',
@@ -97,6 +85,8 @@ export default function CrearLandingVortexPage() {
   const [publicando, setPublicando] = useState(false)
   const [errorPublicar, setErrorPublicar] = useState<string | null>(null)
   const [copiado, setCopiado] = useState(false)
+  const [vistaMobile, setVistaMobile] = useState(false)
+  const previewScrollRef = useRef<HTMLDivElement>(null)
   const linkEdicion = typeof window !== 'undefined' ? window.location.href : ''
 
   function handleCopiarLink() {
@@ -108,6 +98,10 @@ export default function CrearLandingVortexPage() {
 
   function handleChange(path: string, value: string) {
     setConfig((prev) => setPath(prev, path, value))
+  }
+
+  function handleSeccionToggle(key: string, value: boolean) {
+    setConfig((prev) => setPath(prev, `secciones.${key}`, value))
   }
 
   function handleArchivoChange(path: string, file: File) {
@@ -147,124 +141,37 @@ export default function CrearLandingVortexPage() {
     }
   }
 
-  // --- Beneficios (problem, 3 items fijos) ---
-  function handleProblemItem(i: number, campo: 'icono' | 'titulo' | 'descripcion', value: string) {
+  // --- Beneficios (problem, 3 items fijos) — solo el ícono queda en el panel, el resto se edita inline ---
+  function handleProblemIcono(i: number, value: string) {
     setConfig((prev) => {
       const items = [...prev.problem.items]
-      items[i] = { ...items[i], [campo]: value }
+      items[i] = { ...items[i], icono: value }
       return { ...prev, problem: { ...prev.problem, items } }
     })
   }
 
-  // --- Producto 1 / 2 ---
-  function handleProductoCampo(cual: 'producto1' | 'producto2', campo: 'titulo' | 'destacado' | 'descripcion' | 'ctaLabel', value: string) {
-    setConfig((prev) => ({ ...prev, products: { ...prev.products, [cual]: { ...prev.products[cual], [campo]: value } } }))
-  }
-  function handleProductoTag(cual: 'producto1' | 'producto2', i: number, value: string) {
-    setConfig((prev) => {
-      const tags = [...prev.products[cual].tags]
-      tags[i] = value
-      return { ...prev, products: { ...prev.products, [cual]: { ...prev.products[cual], tags } } }
-    })
-  }
-
-  // --- Agentes (3 fijos) ---
-  function handleAgenteCampo(i: number, campo: 'titulo' | 'descripcion', value: string) {
-    setConfig((prev) => {
-      const agentes = [...prev.products.agentes]
-      agentes[i] = { ...agentes[i], [campo]: value }
-      return { ...prev, products: { ...prev.products, agentes } }
-    })
-  }
-
-  // --- Servicios (3 fijos) ---
-  function handleServicioCampo(i: number, campo: 'titulo' | 'subtitulo' | 'descripcion' | 'ctaLabel', value: string) {
-    setConfig((prev) => {
-      const items = [...prev.services.items]
-      items[i] = { ...items[i], [campo]: value }
-      return { ...prev, services: { ...prev.services, items } }
-    })
-  }
-  function handleServicioVideo(i: number, file: File) {
-    const anterior = config.services.items[i]?.video
-    const aplicar = (url: string) =>
-      setConfig((prev) => {
-        const items = [...prev.services.items]
-        items[i] = { ...items[i], video: url }
-        return { ...prev, services: { ...prev.services, items } }
-      })
-    aplicar(URL.createObjectURL(file))
-    subirArchivo(file)
-      .then((url) => {
-        aplicar(url)
-        eliminarArchivo(anterior)
-      })
-      .catch(() => {
-        if (anterior) aplicar(anterior)
-        setErrorPublicar('No pudimos subir el archivo. Probá de nuevo.')
-      })
-  }
-
-  // --- Proceso (4 fijos) ---
-  function handleProcesoCampo(i: number, campo: 'icono' | 'numero' | 'titulo' | 'descripcion', value: string) {
+  // --- Proceso (4 fijos) — solo el ícono queda en el panel ---
+  function handleProcesoIcono(i: number, value: string) {
     setConfig((prev) => {
       const items = [...prev.process.items]
-      items[i] = { ...items[i], [campo]: value }
+      items[i] = { ...items[i], icono: value }
       return { ...prev, process: { ...prev.process, items } }
     })
   }
 
-  // --- Beneficios extra (6 fijos) ---
-  function handleBeneficioExtraCampo(i: number, campo: 'titulo' | 'subtitulo' | 'valor', value: string) {
-    setConfig((prev) => {
-      const items = [...prev.benefitsExtra.items]
-      items[i] = { ...items[i], [campo]: value }
-      return { ...prev, benefitsExtra: { ...prev.benefitsExtra, items } }
-    })
-  }
-
-  // --- Casos (dinámico) ---
-  function handleCasoCampo(i: number, campo: 'tag' | 'titulo' | 'descripcion', value: string) {
-    setConfig((prev) => {
-      const items = [...prev.testimonials.items]
-      items[i] = { ...items[i], [campo]: value }
-      return { ...prev, testimonials: { ...prev.testimonials, items } }
-    })
-  }
+  // --- Casos (dinámico, máximo 4 — el mismo tope que usa el tile "+" del preview) — agregar/quitar queda en el panel, el texto de cada caso se edita inline ---
+  const MAX_CASOS = 4
   function agregarCaso() {
-    setConfig((prev) => ({ ...prev, testimonials: { ...prev.testimonials, items: [...prev.testimonials.items, { tag: '', titulo: '', descripcion: '', logoUrl: '' }] } }))
+    setConfig((prev) => {
+      if (prev.testimonials.items.length >= MAX_CASOS) return prev
+      return { ...prev, testimonials: { ...prev.testimonials, items: [...prev.testimonials.items, { tag: '', titulo: '', descripcion: '', logoUrl: '' }] } }
+    })
   }
   function quitarCaso(i: number) {
     setConfig((prev) => ({ ...prev, testimonials: { ...prev.testimonials, items: prev.testimonials.items.filter((_, idx) => idx !== i) } }))
   }
-  function handleCasoLogo(i: number, file: File) {
-    const anterior = config.testimonials.items[i]?.logoUrl
-    const aplicar = (url: string) =>
-      setConfig((prev) => {
-        const items = [...prev.testimonials.items]
-        items[i] = { ...items[i], logoUrl: url }
-        return { ...prev, testimonials: { ...prev.testimonials, items } }
-      })
-    aplicar(URL.createObjectURL(file))
-    subirArchivo(file)
-      .then((url) => {
-        aplicar(url)
-        eliminarArchivo(anterior)
-      })
-      .catch(() => {
-        if (anterior !== undefined) aplicar(anterior)
-        setErrorPublicar('No pudimos subir el archivo. Probá de nuevo.')
-      })
-  }
 
-  // --- FAQ (dinámico) ---
-  function handleFaqCampo(i: number, campo: 'pregunta' | 'respuesta', value: string) {
-    setConfig((prev) => {
-      const items = [...prev.faq.items]
-      items[i] = { ...items[i], [campo]: value }
-      return { ...prev, faq: { ...prev.faq, items } }
-    })
-  }
+  // --- FAQ (dinámico) — agregar/quitar queda en el panel, el texto de cada pregunta se edita inline ---
   function agregarFaq() {
     setConfig((prev) => ({ ...prev, faq: { ...prev.faq, items: [...prev.faq.items, { pregunta: '', respuesta: '' }] } }))
   }
@@ -284,9 +191,18 @@ export default function CrearLandingVortexPage() {
   return (
     <div className="crear-vortex">
       <div className="crear-vortex__form">
+        <div className="crear-vortex__vista-toggle">
+          <button type="button" className={vistaMobile ? '' : 'activo'} onClick={() => setVistaMobile(false)}>
+            <Monitor size={15} strokeWidth={2} /> Desktop
+          </button>
+          <button type="button" className={vistaMobile ? 'activo' : ''} onClick={() => setVistaMobile(true)}>
+            <Smartphone size={15} strokeWidth={2} /> Mobile
+          </button>
+        </div>
+
         <h1>Armá tu landing</h1>
         <p>
-          Vas viendo el resultado a la derecha, en tiempo real.
+          Vas viendo el resultado a la derecha, en tiempo real. Hacé clic sobre cualquier texto o foto de la vista previa para editarlo directamente.
           {cargando ? ' Cargando tu página…' : guardando ? ' Guardando…' : ' Guardado.'}
         </p>
         {!cargando && (
@@ -299,12 +215,8 @@ export default function CrearLandingVortexPage() {
         <details className="crear-vortex__seccion" open>
           <summary>Identidad</summary>
           <Field label="Nombre de tu empresa" path="identidad.nombreEmpresa" config={config} onChange={handleChange} />
-          <CampoArchivo label="Logo" path="identidad.logoUrl" onArchivoChange={handleArchivoChange} />
           <Field label="WhatsApp (con código de país, sin +)" path="whatsappNumero" config={config} onChange={handleChange} />
           <Field label="Mensaje predefinido de WhatsApp" path="whatsappMensaje" config={config} onChange={handleChange} />
-          <Field label="Texto del globo del botón de WhatsApp" path="whatsappTooltip" config={config} onChange={handleChange} />
-          <Field label="Texto del banner superior (vacío = sin banner)" path="bannerTexto" config={config} onChange={handleChange} textarea />
-          <Field label="Texto del botón principal del menú" path="navCtaLabel" config={config} onChange={handleChange} />
         </details>
 
         <details className="crear-vortex__seccion" open>
@@ -315,128 +227,41 @@ export default function CrearLandingVortexPage() {
         </details>
 
         <details className="crear-vortex__seccion" open>
+          <summary>Secciones visibles</summary>
+          <p className="crear-vortex__ayuda">Destildá para ocultar un bloque completo de la landing — se puede volver a mostrar cuando quieras.</p>
+          {SECCIONES.map(({ key, label }) => (
+            <label className="crear-vortex__check" key={key}>
+              <input
+                type="checkbox"
+                checked={config.secciones?.[key] ?? true}
+                onChange={(e) => handleSeccionToggle(key, e.target.checked)}
+              />
+              {label}
+            </label>
+          ))}
+        </details>
+
+        <details className="crear-vortex__seccion" open>
           <summary>Portada (Hero)</summary>
-          <Field label="Frase corta (badge)" path="hero.badge" config={config} onChange={handleChange} />
-          <Field label="Título (usá ==así== para resaltar)" path="hero.titulo" config={config} onChange={handleChange} textarea />
-          <Field label="Descripción" path="hero.descripcion" config={config} onChange={handleChange} textarea />
-          <Field label="Texto del botón" path="hero.ctaLabel" config={config} onChange={handleChange} />
           <div className="crear-vortex__field">
             <label>Tipo de fondo</label>
             <select value={config.hero.fondoTipo} onChange={(e) => handleChange('hero.fondoTipo', e.target.value)}>
               <option value="tunel">Túnel 3D (animado)</option>
               <option value="imagen">Imagen</option>
-              <option value="video">Video</option>
             </select>
           </div>
-          {config.hero.fondoTipo !== 'tunel' && (
-            <CampoArchivo label="Foto o video de fondo (si no subís nada, se ve el color de fondo sólido)" path="hero.fondoUrl" onArchivoChange={handleArchivoChange} />
-          )}
         </details>
 
         <details className="crear-vortex__seccion">
           <summary>Beneficios</summary>
-          <Field label="Etiqueta" path="problem.eyebrow" config={config} onChange={handleChange} />
-          <Field label="Título (usá ==así== para resaltar)" path="problem.titulo" config={config} onChange={handleChange} />
-          <Field label="Descripción" path="problem.descripcion" config={config} onChange={handleChange} textarea />
-          <Field label="Texto del botón" path="problem.ctaLabel" config={config} onChange={handleChange} />
           {config.problem.items.map((item, i) => (
             <div className="crear-vortex__tarjeta" key={i}>
               <p className="crear-vortex__tarjeta-titulo">Beneficio {i + 1}</p>
               <div className="crear-vortex__field">
                 <label>Ícono</label>
-                <select value={item.icono} onChange={(e) => handleProblemItem(i, 'icono', e.target.value)}>
+                <select value={item.icono} onChange={(e) => handleProblemIcono(i, e.target.value)}>
                   {OPCIONES_ICONO.map((key) => <option key={key} value={key}>{key}</option>)}
                 </select>
-              </div>
-              <div className="crear-vortex__field">
-                <label>Título</label>
-                <input type="text" value={item.titulo} onChange={(e) => handleProblemItem(i, 'titulo', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Descripción</label>
-                <textarea value={item.descripcion} onChange={(e) => handleProblemItem(i, 'descripcion', e.target.value)} />
-              </div>
-            </div>
-          ))}
-        </details>
-
-        <details className="crear-vortex__seccion">
-          <summary>Soluciones</summary>
-          <Field label="Etiqueta" path="products.eyebrow" config={config} onChange={handleChange} />
-          <Field label="Título (usá ==así== para resaltar)" path="products.titulo" config={config} onChange={handleChange} />
-          <Field label="Descripción" path="products.descripcion" config={config} onChange={handleChange} textarea />
-          <Field label="Subtítulo (Productos)" path="products.subtitulo" config={config} onChange={handleChange} />
-          <Field label="Bajada del subtítulo" path="products.subdescripcion" config={config} onChange={handleChange} />
-
-          {(['producto1', 'producto2'] as const).map((cual, idx) => (
-            <div className="crear-vortex__tarjeta" key={cual}>
-              <p className="crear-vortex__tarjeta-titulo">Producto {idx + 1}</p>
-              <div className="crear-vortex__field">
-                <label>Título</label>
-                <input type="text" value={config.products[cual].titulo} onChange={(e) => handleProductoCampo(cual, 'titulo', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Frase destacada</label>
-                <input type="text" value={config.products[cual].destacado} onChange={(e) => handleProductoCampo(cual, 'destacado', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Descripción</label>
-                <textarea value={config.products[cual].descripcion} onChange={(e) => handleProductoCampo(cual, 'descripcion', e.target.value)} />
-              </div>
-              {config.products[cual].tags.map((tag, i) => (
-                <div className="crear-vortex__field" key={i}>
-                  <label>Etiqueta {i + 1}</label>
-                  <input type="text" value={tag} onChange={(e) => handleProductoTag(cual, i, e.target.value)} />
-                </div>
-              ))}
-              <div className="crear-vortex__field">
-                <label>Texto del botón</label>
-                <input type="text" value={config.products[cual].ctaLabel} onChange={(e) => handleProductoCampo(cual, 'ctaLabel', e.target.value)} />
-              </div>
-            </div>
-          ))}
-
-          <p className="crear-vortex__tarjeta-titulo" style={{ marginTop: 8 }}>Funciones del asistente (Producto 2)</p>
-          {config.products.agentes.map((agente, i) => (
-            <div className="crear-vortex__tarjeta" key={i}>
-              <div className="crear-vortex__field">
-                <label>Título</label>
-                <input type="text" value={agente.titulo} onChange={(e) => handleAgenteCampo(i, 'titulo', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Descripción</label>
-                <textarea value={agente.descripcion} onChange={(e) => handleAgenteCampo(i, 'descripcion', e.target.value)} />
-              </div>
-            </div>
-          ))}
-        </details>
-
-        <details className="crear-vortex__seccion">
-          <summary>Servicios</summary>
-          <Field label="Etiqueta" path="services.eyebrow" config={config} onChange={handleChange} />
-          <Field label="Descripción" path="services.descripcion" config={config} onChange={handleChange} />
-          {config.services.items.map((servicio, i) => (
-            <div className="crear-vortex__tarjeta" key={i}>
-              <p className="crear-vortex__tarjeta-titulo">Servicio {i + 1}</p>
-              <div className="crear-vortex__field">
-                <label>Título</label>
-                <input type="text" value={servicio.titulo} onChange={(e) => handleServicioCampo(i, 'titulo', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Subtítulo</label>
-                <input type="text" value={servicio.subtitulo} onChange={(e) => handleServicioCampo(i, 'subtitulo', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Descripción</label>
-                <textarea value={servicio.descripcion} onChange={(e) => handleServicioCampo(i, 'descripcion', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Texto del botón</label>
-                <input type="text" value={servicio.ctaLabel} onChange={(e) => handleServicioCampo(i, 'ctaLabel', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Video</label>
-                <input type="file" accept="video/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleServicioVideo(i, f) }} />
               </div>
             </div>
           ))}
@@ -444,48 +269,14 @@ export default function CrearLandingVortexPage() {
 
         <details className="crear-vortex__seccion">
           <summary>Cómo empezar</summary>
-          <Field label="Etiqueta" path="process.eyebrow" config={config} onChange={handleChange} />
-          <Field label="Título (usá ==así== para resaltar)" path="process.titulo" config={config} onChange={handleChange} />
-          <Field label="Descripción" path="process.descripcion" config={config} onChange={handleChange} textarea />
-          <Field label="Texto del botón" path="process.ctaLabel" config={config} onChange={handleChange} />
           {config.process.items.map((paso, i) => (
             <div className="crear-vortex__tarjeta" key={i}>
               <p className="crear-vortex__tarjeta-titulo">Paso {paso.numero}</p>
               <div className="crear-vortex__field">
                 <label>Ícono</label>
-                <select value={paso.icono} onChange={(e) => handleProcesoCampo(i, 'icono', e.target.value)}>
+                <select value={paso.icono} onChange={(e) => handleProcesoIcono(i, e.target.value)}>
                   {OPCIONES_ICONO.map((key) => <option key={key} value={key}>{key}</option>)}
                 </select>
-              </div>
-              <div className="crear-vortex__field">
-                <label>Título</label>
-                <input type="text" value={paso.titulo} onChange={(e) => handleProcesoCampo(i, 'titulo', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Descripción</label>
-                <textarea value={paso.descripcion} onChange={(e) => handleProcesoCampo(i, 'descripcion', e.target.value)} />
-              </div>
-            </div>
-          ))}
-        </details>
-
-        <details className="crear-vortex__seccion">
-          <summary>Beneficios (segundo bloque)</summary>
-          <Field label="Título línea 1" path="benefitsExtra.tituloLinea1" config={config} onChange={handleChange} />
-          <Field label="Título línea 2 (usá ==así== para resaltar)" path="benefitsExtra.tituloLinea2" config={config} onChange={handleChange} />
-          {config.benefitsExtra.items.map((b, i) => (
-            <div className="crear-vortex__tarjeta" key={i}>
-              <div className="crear-vortex__field">
-                <label>Valor (ej: +75%)</label>
-                <input type="text" value={b.valor} onChange={(e) => handleBeneficioExtraCampo(i, 'valor', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Título</label>
-                <input type="text" value={b.titulo} onChange={(e) => handleBeneficioExtraCampo(i, 'titulo', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Subtítulo</label>
-                <input type="text" value={b.subtitulo} onChange={(e) => handleBeneficioExtraCampo(i, 'subtitulo', e.target.value)} />
               </div>
             </div>
           ))}
@@ -493,51 +284,24 @@ export default function CrearLandingVortexPage() {
 
         <details className="crear-vortex__seccion">
           <summary>Casos de éxito</summary>
-          <Field label="Etiqueta" path="testimonials.eyebrow" config={config} onChange={handleChange} />
-          <Field label="Título (usá ==así== para resaltar)" path="testimonials.titulo" config={config} onChange={handleChange} />
-          <Field label="Descripción" path="testimonials.descripcion" config={config} onChange={handleChange} textarea />
-          <Field label="Texto del botón" path="testimonials.ctaLabel" config={config} onChange={handleChange} />
-          {config.testimonials.items.map((c, i) => (
+          <p className="crear-vortex__ayuda">El texto y el logo de cada caso se editan haciendo clic directo en la vista previa. Acá solo agregás o quitás casos.</p>
+          {config.testimonials.items.map((_, i) => (
             <div className="crear-vortex__tarjeta" key={i}>
-              <div className="crear-vortex__field">
-                <label>Rubro</label>
-                <input type="text" value={c.tag} onChange={(e) => handleCasoCampo(i, 'tag', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Título</label>
-                <input type="text" value={c.titulo} onChange={(e) => handleCasoCampo(i, 'titulo', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Descripción</label>
-                <textarea value={c.descripcion} onChange={(e) => handleCasoCampo(i, 'descripcion', e.target.value)} />
-              </div>
-              <CampoArchivo
-                label="Logo del cliente (opcional — si no subís nada, se muestra un placeholder)"
-                path={`testimonials.items.${i}.logoUrl`}
-                onArchivoChange={(_, file) => handleCasoLogo(i, file)}
-              />
+              <p className="crear-vortex__tarjeta-titulo">Caso {i + 1}</p>
               <button type="button" className="crear-vortex__btn-quitar" onClick={() => quitarCaso(i)}>Quitar caso</button>
             </div>
           ))}
-          <button type="button" className="crear-vortex__btn-agregar" onClick={agregarCaso}>+ Agregar caso</button>
+          {config.testimonials.items.length < MAX_CASOS && (
+            <button type="button" className="crear-vortex__btn-agregar" onClick={agregarCaso}>+ Agregar caso</button>
+          )}
         </details>
 
         <details className="crear-vortex__seccion">
           <summary>Preguntas frecuentes</summary>
-          <Field label="Etiqueta pequeña arriba del título" path="faq.eyebrow" config={config} onChange={handleChange} />
-          <Field label="Título (usá ==así== para resaltar)" path="faq.titulo" config={config} onChange={handleChange} />
-          <Field label="Pregunta de cierre (ej: ¿No encontraste tu pregunta?)" path="faq.ctaPregunta" config={config} onChange={handleChange} />
-          <Field label="Texto del botón" path="faq.ctaLabel" config={config} onChange={handleChange} />
-          {config.faq.items.map((item, i) => (
+          <p className="crear-vortex__ayuda">La pregunta y la respuesta se editan haciendo clic directo en la vista previa. Acá solo agregás o quitás preguntas.</p>
+          {config.faq.items.map((_, i) => (
             <div className="crear-vortex__tarjeta" key={i}>
-              <div className="crear-vortex__field">
-                <label>Pregunta</label>
-                <input type="text" value={item.pregunta} onChange={(e) => handleFaqCampo(i, 'pregunta', e.target.value)} />
-              </div>
-              <div className="crear-vortex__field">
-                <label>Respuesta</label>
-                <textarea value={item.respuesta} onChange={(e) => handleFaqCampo(i, 'respuesta', e.target.value)} />
-              </div>
+              <p className="crear-vortex__tarjeta-titulo">Pregunta {i + 1}</p>
               <button type="button" className="crear-vortex__btn-quitar" onClick={() => quitarFaq(i)}>Quitar pregunta</button>
             </div>
           ))}
@@ -545,22 +309,8 @@ export default function CrearLandingVortexPage() {
         </details>
 
         <details className="crear-vortex__seccion">
-          <summary>CTA final</summary>
-          <Field label="Título (2 líneas, usá ==así== para resaltar)" path="finalCta.titulo" config={config} onChange={handleChange} textarea />
-          <Field label="Descripción" path="finalCta.descripcion" config={config} onChange={handleChange} textarea />
-          <Field label="Texto del botón" path="finalCta.ctaLabel" config={config} onChange={handleChange} />
-        </details>
-
-        <details className="crear-vortex__seccion">
           <summary>Pie de página</summary>
-          <Field label="Descripción de tu empresa" path="footer.descripcion" config={config} onChange={handleChange} textarea />
-          <Field label="Título de la columna de links" path="footer.tituloNavegacion" config={config} onChange={handleChange} />
-          <Field label="Título de la columna de contacto" path="footer.tituloContacto" config={config} onChange={handleChange} />
-          <Field label="Email de contacto" path="footer.contacto.email" config={config} onChange={handleChange} />
-          <Field label="WhatsApp (con código de país, sin +)" path="footer.contacto.whatsappNumero" config={config} onChange={handleChange} />
-          <Field label="WhatsApp (como se muestra)" path="footer.contacto.whatsappTexto" config={config} onChange={handleChange} />
-          <Field label="Dirección" path="footer.contacto.direccion" config={config} onChange={handleChange} />
-          <Field label="Texto de copyright" path="footer.copyrightTexto" config={config} onChange={handleChange} />
+          <Field label="WhatsApp (con código de país, sin +) — el que se abre al hacer clic" path="footer.contacto.whatsappNumero" config={config} onChange={handleChange} />
         </details>
 
         <div className="crear-vortex__subdominio">
@@ -607,7 +357,27 @@ export default function CrearLandingVortexPage() {
       </div>
 
       <div className="crear-vortex__preview">
-        <VortexPage config={config} />
+        {vistaMobile ? (
+          <div className="crear-vortex__preview-mobile-wrap">
+            <MobilePreviewFrame>
+              <VortexPage config={config} />
+            </MobilePreviewFrame>
+          </div>
+        ) : (
+          <div className="crear-vortex__preview-scroll" ref={previewScrollRef}>
+            <VortexPage
+              config={config}
+              editable
+              onFieldChange={handleChange}
+              onArchivoChange={handleArchivoChange}
+              onAgregarCaso={agregarCaso}
+              onQuitarCaso={quitarCaso}
+              onAgregarFaq={agregarFaq}
+              onQuitarFaq={quitarFaq}
+              scrollContainerRef={previewScrollRef}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

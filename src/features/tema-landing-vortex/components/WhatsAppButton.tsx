@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { FaWhatsapp } from "react-icons/fa";
 import { buildWhatsappUrl } from "../lib/whatsapp";
 import type { VortexConfig } from "../config";
+import { EditableText } from '@/shared/components/EditableText';
 
 export default function WhatsAppButton({ config }: { config: VortexConfig }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -26,12 +28,13 @@ export default function WhatsAppButton({ config }: { config: VortexConfig }) {
         className="hidden sm:flex mr-4 px-4 py-2 rounded-full shadow-lg items-center"
         style={{ background: "#fff", border: "1.5px solid #E5E7EB" }}
       >
-        <span
+        <EditableText
+          path="whatsappTooltip"
+          value={config.whatsappTooltip}
+          as="span"
           className="text-base font-semibold"
           style={{ color: "#0F3E57", letterSpacing: "0.01em" }}
-        >
-          {config.whatsappTooltip}
-        </span>
+        />
       </motion.div>
 
       <motion.button
@@ -45,13 +48,7 @@ export default function WhatsAppButton({ config }: { config: VortexConfig }) {
         onClick={openWhatsApp}
         aria-label="Contactar por WhatsApp"
       >
-        <img
-          src="/assets/vortex/ui/Chatbot azul.svg"
-          alt="Chatbot"
-          width={32}
-          height={32}
-          className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
-        />
+        <FaWhatsapp className="w-7 h-7 sm:w-9 sm:h-9" style={{ color: "#25D366" }} aria-hidden="true" />
       </motion.button>
     </motion.div>
   );

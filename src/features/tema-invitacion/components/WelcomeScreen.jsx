@@ -1,5 +1,16 @@
 import { useEffect, useRef } from 'react'
 import '../styles/WelcomeScreen.css'
+import { EditableText } from '@/shared/components/EditableText'
+import { useEditable } from '@/shared/components/EditableContext'
+
+function renderMultilinea(texto) {
+  return texto.split('\n').map((linea, i, arr) => (
+    <span key={i}>
+      {linea}
+      {i < arr.length - 1 && <br />}
+    </span>
+  ))
+}
 
 export default function WelcomeScreen({
   onEnter,
@@ -11,6 +22,7 @@ export default function WelcomeScreen({
 }) {
   const iframeRef = useRef(null)
   const playerRef = useRef(null)
+  const { editable } = useEditable()
 
   useEffect(() => {
     const tag = document.createElement('script')
@@ -35,18 +47,20 @@ export default function WelcomeScreen({
       <div style={{ width: 1, height: 1, overflow: 'hidden', position: 'absolute' }}>
         <div id="yt-player" ref={iframeRef} />
       </div>
-      <p className="welcome__eyebrow fade-up">{eyebrow}</p>
-      <h1 className="welcome__title fade-up delay-1">{nombre}</h1>
-      <p className="welcome__sub fade-up delay-2">
-        {subtitulo.split('\n').map((linea, i, arr) => (
-          <span key={i}>
-            {linea}
-            {i < arr.length - 1 && <br />}
-          </span>
-        ))}
-      </p>
+      <EditableText path="anfitrion.eyebrow" value={eyebrow} as="p" className="welcome__eyebrow fade-up" />
+      <EditableText path="anfitrion.nombre" value={nombre} as="h1" className="welcome__title fade-up delay-1" />
+      <EditableText
+        path="bienvenida.subtitulo"
+        value={subtitulo}
+        as="p"
+        multiline
+        className="welcome__sub fade-up delay-2"
+        render={renderMultilinea}
+      />
       <button className="welcome__btn fade-up delay-3" onClick={handleEnter}>
-        {botonIngresar}
+        <span onClick={(e) => editable && e.stopPropagation()}>
+          <EditableText path="textos.botonIngresar" value={botonIngresar} as="span" />
+        </span>
       </button>
     </div>
   )

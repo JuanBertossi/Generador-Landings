@@ -1,8 +1,18 @@
 
 import { motion, useScroll } from "framer-motion"
+import type { RefObject } from "react"
 
-export default function ScrollProgress() {
-  const { scrollYProgress } = useScroll()
+type ScrollProgressProps = {
+  /** Contenedor que realmente scrollea (el panel de preview del editor no
+   * scrollea la ventana, scrollea un div interno propio) — sin esto,
+   * useScroll() trackea el scroll de la ventana y la barra nunca se mueve
+   * dentro del editor. En la página publicada (sin este prop) sigue
+   * trackeando la ventana normalmente. */
+  containerRef?: RefObject<HTMLElement>
+}
+
+export default function ScrollProgress({ containerRef }: ScrollProgressProps) {
+  const { scrollYProgress } = useScroll(containerRef ? { container: containerRef } : undefined)
 
   return (
     <motion.div

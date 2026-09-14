@@ -69,10 +69,16 @@ html { scroll-behavior: smooth; }
   margin: 0 auto 1.5rem;
 }
 
+/* Antes usaba width:100vw + márgenes negativos (truco típico para "romper"
+   un contenedor padre con padding/max-width). Acá las secciones son hijas
+   directas de .invitacion-root, que no tiene padding ni max-width propio —
+   no hay nada de qué "escapar". width:100% ya las deja a ancho completo en
+   la página publicada, Y además evita el bug real que tenía 100vw: dentro
+   del panel de preview angosto del editor (al lado del sidebar), 100vw
+   toma el ancho de LA VENTANA completa del navegador, no el de la columna
+   angosta donde están — las secciones se desalineaban por completo ahí. */
 .alignfull {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
 }
 
 .section {

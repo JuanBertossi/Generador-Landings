@@ -3,6 +3,8 @@ import "@/features/tema-landing-fleepix/styles/funcionalidades/funcionalidades.c
 import { useFuncionalidadesStack } from "../hooks/useFuncionalidadesStack";
 import { getIcono } from "../lib/iconos";
 import type { LandingFleepixConfig } from "../config";
+import { EditableText } from "@/shared/components/EditableText";
+import { EditableImagen } from "@/shared/components/EditableImagen";
 
 const FK_CARD_CLASS =
   "sticky top-[110px] mb-9 scroll-mt-[110px] bg-[var(--bg-elev)] border border-[var(--border)] rounded-[var(--r-block)] p-[18px] shadow-[0_18px_50px_rgba(0,37,52,0.1)] origin-top transition-[transform,opacity] duration-[400ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] will-change-transform last:mb-0 max-[900px]:mb-5 max-[480px]:flex-[0_0_91%]";
@@ -34,19 +36,19 @@ export function Funcionalidades({ config }: { config: LandingFleepixConfig }) {
         <div className="sticky top-[110px] self-start max-[900px]:static max-[900px]:top-auto">
           <div>
             <span className="inline-block font-['Sora'] font-bold text-[12.5px] text-[var(--azul-300)] tracking-[0.14em] mb-[14px]">
-              {funcionalidades.eyebrow}
+              <EditableText path="funcionalidades.eyebrow" value={funcionalidades.eyebrow} as="span" />
             </span>
             <h2 className="font-['Sora'] font-bold text-[clamp(28px,3.4vw,44px)] max-[768px]:text-[clamp(26px,6vw,36px)] max-[480px]:text-[clamp(23px,7.5vw,30px)] tracking-[-0.02em] mb-[14px] leading-[1.1] text-balance text-[var(--neutro-100)]">
-              {funcionalidades.titulo}
+              <EditableText path="funcionalidades.titulo" value={funcionalidades.titulo} as="span" />
             </h2>
             <p className="text-[var(--navy-200)] text-[15.5px] leading-[1.6] mb-[26px] max-w-[38ch] max-[768px]:max-w-none">
-              {funcionalidades.descripcion}
+              <EditableText path="funcionalidades.descripcion" value={funcionalidades.descripcion} as="span" multiline />
             </p>
           </div>
           <div className="flex flex-col gap-0.5 max-[900px]:hidden">
             {funcionalidades.items.map((item, i) => (
               <button
-                key={item.navLabel}
+                key={i}
                 className={`flex items-center w-full text-left cursor-pointer border rounded-lg px-[14px] py-[11px] font-['Sora'] font-medium text-[15.5px] transition-[color,background,border-color,box-shadow] duration-200 ${
                   active === i
                     ? "bg-[var(--bg-elev)] border-[var(--border)] text-[var(--text)] font-semibold shadow-[0_8px_24px_rgba(0,37,52,0.08)] hover:text-[var(--navy-500)]"
@@ -61,7 +63,7 @@ export function Funcionalidades({ config }: { config: LandingFleepixConfig }) {
                 >
                   <ArrowRight size={18} strokeWidth={2.2} />
                 </span>
-                {item.navLabel}
+                <EditableText path={`funcionalidades.items.${i}.navLabel`} value={item.navLabel} as="span" />
               </button>
             ))}
           </div>
@@ -72,29 +74,32 @@ export function Funcionalidades({ config }: { config: LandingFleepixConfig }) {
             const ChipIcono = getIcono(item.chipIcono);
             return (
               <article
-                key={item.navLabel}
+                key={i}
                 className={FK_CARD_CLASS}
                 ref={(el) => {
                   cardRefs.current[i] = el;
                 }}
               >
                 <div className={FK_SHOT_CLASS}>
-                  <img
+                  <EditableImagen
+                    path={`funcionalidades.items.${i}.foto`}
                     src={item.foto}
                     alt={item.titulo}
                     className="absolute inset-0 w-full h-full object-cover object-center"
                     width={2164}
                     height={1212}
-                    loading="lazy"
-                    decoding="async"
                   />
                 </div>
                 <span className={FK_CHIP_CLASS}>
                   <ChipIcono size={16} />
-                  {item.chipLabel}
+                  <EditableText path={`funcionalidades.items.${i}.chipLabel`} value={item.chipLabel} as="span" />
                 </span>
-                <h3 className={FK_H3_CLASS}>{item.titulo}</h3>
-                <p className={FK_P_CLASS}>{item.descripcion}</p>
+                <h3 className={FK_H3_CLASS}>
+                  <EditableText path={`funcionalidades.items.${i}.titulo`} value={item.titulo} as="span" />
+                </h3>
+                <p className={FK_P_CLASS}>
+                  <EditableText path={`funcionalidades.items.${i}.descripcion`} value={item.descripcion} as="span" multiline />
+                </p>
               </article>
             );
           })}

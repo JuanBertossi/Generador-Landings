@@ -3,11 +3,13 @@ import { Fragment } from "react";
 import { buildWhatsappUrl } from "../lib/whatsapp";
 import { textoConEnfasis } from "../lib/textoConEnfasis";
 import type { VortexConfig } from "../config";
+import { EditableText } from '@/shared/components/EditableText';
+import { useEditable } from '@/shared/components/EditableContext';
 
 export default function FinalCta({ config }: { config: VortexConfig }) {
   const { finalCta } = config;
+  const { editable } = useEditable();
   const waLink = buildWhatsappUrl(config.whatsappNumero, config.whatsappMensaje);
-  const lineas = finalCta.titulo.split("\n");
 
   return (
     <section className="pt-[40px] pb-[100px] px-[16px] sm:px-[40px]" style={{ position: "relative" }}>
@@ -33,14 +35,23 @@ export default function FinalCta({ config }: { config: VortexConfig }) {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              style={{ margin: "0 0 22px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(32px, 5vw, 54px)", fontWeight: 700, letterSpacing: "-.02em", lineHeight: "1.08", color: "var(--v-text)" }}
             >
-              {lineas.map((linea, i) => (
-                <Fragment key={i}>
-                  {textoConEnfasis(linea)}
-                  {i < lineas.length - 1 && <br />}
-                </Fragment>
-              ))}
+              <EditableText
+                path="finalCta.titulo"
+                value={finalCta.titulo}
+                as="h2"
+                multiline
+                style={{ margin: "0 0 22px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(32px, 5vw, 54px)", fontWeight: 700, letterSpacing: "-.02em", lineHeight: "1.08", color: "var(--v-text)" }}
+                render={(v) => {
+                  const lineas = v.split("\n")
+                  return lineas.map((linea, i) => (
+                    <Fragment key={i}>
+                      {textoConEnfasis(linea)}
+                      {i < lineas.length - 1 && <br />}
+                    </Fragment>
+                  ))
+                }}
+              />
             </motion.h2>
 
             <motion.p
@@ -48,9 +59,14 @@ export default function FinalCta({ config }: { config: VortexConfig }) {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              style={{ margin: "0 auto 36px", maxWidth: "540px", fontSize: "clamp(15px, 1.2vw, 18px)", lineHeight: "1.6", color: "var(--v-text)" }}
             >
-              {finalCta.descripcion}
+              <EditableText
+                path="finalCta.descripcion"
+                value={finalCta.descripcion}
+                as="p"
+                multiline
+                style={{ margin: "0 auto 36px", maxWidth: "540px", fontSize: "clamp(15px, 1.2vw, 18px)", lineHeight: "1.6", color: "var(--v-text)" }}
+              />
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} viewport={{ once: true }}>
@@ -60,7 +76,9 @@ export default function FinalCta({ config }: { config: VortexConfig }) {
                 style={{ padding: "17px 38px", borderRadius: "999px", border: "none", cursor: "pointer", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "17px", fontWeight: 700, whiteSpace: "nowrap" }}
                 onClick={() => window.open(waLink, "_blank")}
               >
-                {finalCta.ctaLabel}
+                <span onClick={(e) => editable && e.stopPropagation()}>
+                  <EditableText path="finalCta.ctaLabel" value={finalCta.ctaLabel} as="span" />
+                </span>
               </button>
             </motion.div>
           </div>

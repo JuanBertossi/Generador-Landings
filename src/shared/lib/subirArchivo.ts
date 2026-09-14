@@ -1,6 +1,5 @@
 import { supabase } from './supabaseClient'
 
-const MAX_VIDEO_BYTES = 25 * 1024 * 1024
 const MAX_DIMENSION = 1920
 const BUCKET = 'archivos-paginas'
 
@@ -40,20 +39,23 @@ function comprimirImagen(file: File): Promise<Blob> {
   })
 }
 
-/** Sube una imagen (comprimida a WebP) o video a Supabase Storage y devuelve la URL pública. */
+/**
+ * Sube una imagen (comprimida a WebP) a Supabase Storage y devuelve la URL
+ * pública. Solo imágenes — sin video: el plan free de Supabase da 1GB de
+ * Storage, y un video pesa fácil 50-100x lo que una foto ya comprimida.
+ * Con muchos usuarios subiendo video ese 1GB se llena rápido; con solo
+ * fotos (livianas, todas convertidas a WebP acá abajo) rinde muchísimo más.
+ */
 export async function subirArchivo(file: File): Promise<string> {
-  const esVideo = file.type.startsWith('video/')
-
-  if (esVideo && file.size > MAX_VIDEO_BYTES) {
-    throw new Error('El video pesa más de 25MB — subí uno más liviano.')
+  if (file.type.startsWith('video/')) {
+    throw new Error('No se pueden subir videos, solo fotos.')
   }
 
-  const cuerpo = esVideo ? file : await comprimirImagen(file)
-  const extension = esVideo ? file.name.split('.').pop() || 'mp4' : 'webp'
-  const nombre = `${crypto.randomUUID()}.${extension}`
+  const cuerpo = await comprimirImagen(file)
+  const nombre = `${crypto.randomUUID()}.webp`
 
   const { error } = await supabase.storage.from(BUCKET).upload(nombre, cuerpo, {
-    contentType: esVideo ? file.type : 'image/webp',
+    contentType: 'image/webp',
     cacheControl: '31536000',
   })
   if (error) throw error

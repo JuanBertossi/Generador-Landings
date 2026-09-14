@@ -14,6 +14,37 @@
   border-right: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+.crear-invitacion__vista-toggle {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 20px;
+  padding: 4px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.crear-invitacion__vista-toggle button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(245, 245, 247, 0.6);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.crear-invitacion__vista-toggle button.activo {
+  background: #f5f5f7;
+  color: #0b0b0f;
+}
+
 .crear-invitacion__form h1 {
   font-size: 20px;
   margin: 0 0 4px;
@@ -329,6 +360,13 @@
 .crear-invitacion__preview-frame {
   transform: scale(1);
   transform-origin: top left;
+}
+
+.crear-invitacion__preview-mobile-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+  min-height: 100%;
 }
 
 @media (max-width: 900px) {

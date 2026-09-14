@@ -21,12 +21,12 @@ export function Footer({ config }: { config: LandingFleepixConfig }) {
       <div className="mx-auto max-w-[1360px] px-4">
         <div className="grid grid-cols-[1.3fr_0.8fr_1fr_1.3fr] gap-10 items-start max-[900px]:grid-cols-2 max-[900px]:gap-x-10 max-[900px]:gap-y-[34px] max-[480px]:grid-cols-1 max-[480px]:gap-[30px]">
           <Reveal as="div" index={0} className="max-[900px]:col-span-full max-[480px]:col-auto">
-            {identidad.logoUrl ? (
+            {identidad.logoUrl || editable ? (
               <EditableImagen
                 path="identidad.logoUrl"
                 src={identidad.logoUrl}
                 alt={identidad.nombreEmpresa}
-                className="block h-10 w-auto mb-[22px] -ml-3.5 origin-left transition-transform duration-[250ms] hover:scale-[1.08]"
+                className="block h-10 w-auto min-w-[70px] mb-[22px] -ml-3.5 origin-left transition-transform duration-[250ms] hover:scale-[1.08]"
               />
             ) : (
               <FleepixLogo
@@ -48,6 +48,7 @@ export function Footer({ config }: { config: LandingFleepixConfig }) {
                   <a
                     href={link.href}
                     className="inline-flex items-center gap-[9px] text-[var(--navy-200)] text-sm font-medium transition-colors duration-150 hover:text-[var(--azul-300)]"
+                    style={{ color: 'var(--navy-200)' }}
                   >
                     <EditableText path={`navLinks.${i}.label`} value={link.label} as="span" />
                   </a>
@@ -68,6 +69,7 @@ export function Footer({ config }: { config: LandingFleepixConfig }) {
                   <a
                     href={`mailto:${footer.contacto.email}`}
                     className="inline-flex items-center gap-[9px] font-medium transition-colors duration-150 hover:text-[var(--azul-300)]"
+                    style={{ color: 'var(--navy-200)' }}
                   >
                     <EditableText
                       path="footer.contacto.email"
@@ -88,6 +90,7 @@ export function Footer({ config }: { config: LandingFleepixConfig }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-[9px] font-medium transition-colors duration-150 hover:text-[var(--azul-300)]"
+                    style={{ color: 'var(--navy-200)' }}
                   >
                     <EditableText
                       path="footer.contacto.whatsappTexto"
@@ -108,6 +111,7 @@ export function Footer({ config }: { config: LandingFleepixConfig }) {
                     value={footer.contacto.direccion}
                     as="span"
                     className="text-[var(--navy-200)] text-sm"
+                    style={{ color: 'var(--navy-200)' }}
                     placeholder="Tu dirección"
                   />
                 </li>
@@ -128,6 +132,7 @@ export function Footer({ config }: { config: LandingFleepixConfig }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[var(--azul-300)] font-bold hover:text-[var(--azul-200)] hover:underline"
+                    style={{ color: 'var(--azul-300)' }}
                   >
                     Consultanos por desarrollos a medida
                   </a>

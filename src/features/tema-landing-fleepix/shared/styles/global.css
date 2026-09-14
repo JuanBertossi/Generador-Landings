@@ -145,11 +145,14 @@ html {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
-@layer base {
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
+/* Antes tenía "color: inherit" acá adentro de @layer base — por algún
+   motivo (a confirmar) le ganaba al text-[var(...)] explícito de varios
+   CTAs/links del navbar y footer, dejando texto oscuro sobre fondo oscuro
+   (invisible). Todos los <a> con texto visible en este tema ya traen su
+   propio color por Tailwind, así que sacamos el "color: inherit" entero en
+   vez de perseguir la causa exacta — nada depende de heredarlo. */
+a {
+  text-decoration: none;
 }
 #site h1,
 #site h2,

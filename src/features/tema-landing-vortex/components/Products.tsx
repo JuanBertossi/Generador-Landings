@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import AtencionVentasAnimation from "../animations/AtencionVentas";
-import GestionInternaAnimation from "../animations/GestionInterna";
 import { buildWhatsappUrl } from "../lib/whatsapp";
 import { textoConEnfasis } from "../lib/textoConEnfasis";
 import type { VortexConfig, VortexProducto } from "../config";
+import { EditableText } from "@/shared/components/EditableText";
+import { EditableImagen } from "@/shared/components/EditableImagen";
+import { useEditable } from "@/shared/components/EditableContext";
 
 const ARROW_PATH =
   "M16.175 13H5C4.71667 13 4.47917 12.9042 4.2875 12.7125C4.09583 12.5208 4 12.2833 4 12C4 11.7167 4.09583 11.4792 4.2875 11.2875C4.47917 11.0958 4.71667 11 5 11H16.175L11.275 6.09999C11.075 5.89999 10.9792 5.66665 10.9875 5.39999C10.9958 5.13332 11.1 4.89999 11.3 4.69999C11.5 4.51665 11.7333 4.42082 12 4.41249C12.2667 4.40415 12.5 4.49999 12.7 4.69999L19.3 11.3C19.4 11.4 19.4708 11.5083 19.5125 11.625C19.5542 11.7417 19.575 11.8667 19.575 12C19.575 12.1333 19.5542 12.2583 19.5125 12.375C19.4708 12.4917 19.4 12.6 19.3 12.7L12.7 19.3C12.5167 19.4833 12.2875 19.575 12.0125 19.575C11.7375 19.575 11.5 19.4833 11.3 19.3C11.1 19.1 11 18.8625 11 18.5875C11 18.3125 11.1 18.075 11.3 17.875L16.175 13Z";
@@ -78,13 +79,16 @@ function TarjetaProducto({
   activa,
   onCtaClick,
   gradiente,
+  configPath,
 }: {
   producto: VortexProducto;
   variante: "gestion" | "atencion";
   activa: boolean;
   onCtaClick: () => void;
   gradiente: string;
+  configPath: "products.producto1" | "products.producto2";
 }) {
+  const { editable } = useEditable();
   return (
     <div
       className={`${variante === "gestion" ? "prod-card-1" : "prod-card-2"} ${activa ? "prod-card-active" : "prod-card-inactive"}`}
@@ -98,34 +102,41 @@ function TarjetaProducto({
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
             <IconoProducto variante={variante} />
           </div>
-          <h3 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 700, lineHeight: "1.15", letterSpacing: "-.01em", color: "var(--v-text)" }}>
-            {producto.titulo}
-          </h3>
+          <EditableText path={`${configPath}.titulo`} value={producto.titulo} as="h3" style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 700, lineHeight: "1.15", letterSpacing: "-.01em", color: "var(--v-text)" }} />
           <p style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: "clamp(14px, 1.2vw, 16px)", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 62%, transparent)" }}>
-            <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 600, color: "var(--v-accent)" }}>
-              {producto.destacado}
-            </span>{" "}
-            {producto.descripcion}
+            <EditableText path={`${configPath}.destacado`} value={producto.destacado} as="span" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 600, color: "var(--v-accent)" }} />{" "}
+            <EditableText path={`${configPath}.descripcion`} value={producto.descripcion} as="span" />
           </p>
           <div className="justify-between sm:justify-start" style={{ display: "flex", flexWrap: "nowrap", gap: "8px" }}>
-            {producto.tags.map((tag) => (
-              <Tag key={tag}>{tag}</Tag>
+            {producto.tags.map((tag, i) => (
+              <Tag key={i}>
+                <EditableText path={`${configPath}.tags.${i}`} value={tag} as="span" />
+              </Tag>
             ))}
           </div>
           <div className="hidden sm:block">
-            <ProductButton onClick={onCtaClick}>{producto.ctaLabel}</ProductButton>
+            <ProductButton onClick={onCtaClick}>
+              <span onClick={(e) => editable && e.stopPropagation()}>
+                <EditableText path={`${configPath}.ctaLabel`} value={producto.ctaLabel} as="span" />
+              </span>
+            </ProductButton>
           </div>
         </div>
         <div>
-          <div style={{ height: "430px" }}>
-            {variante === "gestion" ? (
-              <GestionInternaAnimation key={activa ? "active" : "idle"} />
-            ) : (
-              <AtencionVentasAnimation key={activa ? "active" : "idle"} />
-            )}
+          <div style={{ height: "430px", borderRadius: "18px", overflow: "hidden", background: "linear-gradient(135deg, var(--v-card-1), var(--v-card-2))", border: "1px solid color-mix(in srgb, var(--v-text) 8%, transparent)" }}>
+            <EditableImagen
+              path={`${configPath}.foto`}
+              src={producto.foto}
+              alt=""
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
           </div>
           <div className="sm:hidden">
-            <ProductButton onClick={onCtaClick}>{producto.ctaLabel}</ProductButton>
+            <ProductButton onClick={onCtaClick}>
+              <span onClick={(e) => editable && e.stopPropagation()}>
+                <EditableText path={`${configPath}.ctaLabel`} value={producto.ctaLabel} as="span" />
+              </span>
+            </ProductButton>
           </div>
         </div>
       </div>
@@ -154,27 +165,17 @@ export default function Products({ config }: { config: VortexConfig }) {
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: "1120px", margin: "0 auto" }}>
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", marginBottom: "20px" }}>
-          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--v-accent)" }}>
-            {products.eyebrow}
-          </span>
+          <EditableText path="products.eyebrow" value={products.eyebrow} as="span" style={{ fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--v-accent)" }} />
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} viewport={{ once: true }} style={{ textAlign: "center", maxWidth: "760px", margin: "0 auto 50px" }}>
-          <h2 style={{ margin: "0 0 18px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(32px, 5vw, 46px)", fontWeight: 700, letterSpacing: "-.02em", lineHeight: "1.08", color: "var(--v-text)" }}>
-            {textoConEnfasis(products.titulo)}
-          </h2>
-          <p style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: "clamp(15px, 1.2vw, 17px)", lineHeight: "1.7", color: "var(--v-text)" }}>
-            {products.descripcion}
-          </p>
+          <EditableText path="products.titulo" value={products.titulo} as="h2" multiline render={textoConEnfasis} style={{ margin: "0 0 18px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(32px, 5vw, 46px)", fontWeight: 700, letterSpacing: "-.02em", lineHeight: "1.08", color: "var(--v-text)" }} />
+          <EditableText path="products.descripcion" value={products.descripcion} as="p" multiline style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: "clamp(15px, 1.2vw, 17px)", lineHeight: "1.7", color: "var(--v-text)" }} />
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} viewport={{ once: true }} style={{ margin: "8px 0 32px", textAlign: "center" }}>
-          <h3 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(26px, 5vw, 30px)", fontWeight: 700, letterSpacing: "-.01em", color: "var(--v-text)" }}>
-            {products.subtitulo}
-          </h3>
-          <p style={{ margin: "10px 0 0", fontFamily: "'Inter', sans-serif", fontSize: "16px", color: "color-mix(in srgb, var(--v-text) 55%, transparent)" }}>
-            {products.subdescripcion}
-          </p>
+          <EditableText path="products.subtitulo" value={products.subtitulo} as="h3" style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(26px, 5vw, 30px)", fontWeight: 700, letterSpacing: "-.01em", color: "var(--v-text)" }} />
+          <EditableText path="products.subdescripcion" value={products.subdescripcion} as="p" style={{ margin: "10px 0 0", fontFamily: "'Inter', sans-serif", fontSize: "16px", color: "color-mix(in srgb, var(--v-text) 55%, transparent)" }} />
         </motion.div>
 
         <div
@@ -194,6 +195,7 @@ export default function Products({ config }: { config: VortexConfig }) {
               activa={activeSlide === 0}
               onCtaClick={openWA}
               gradiente="linear-gradient(120deg, rgba(124,58,237,.55), color-mix(in srgb, var(--v-accent) 8%, transparent) 50%, color-mix(in srgb, var(--v-accent) 42%, transparent))"
+              configPath="products.producto1"
             />
             <TarjetaProducto
               producto={products.producto2}
@@ -201,6 +203,7 @@ export default function Products({ config }: { config: VortexConfig }) {
               activa={activeSlide === 1}
               onCtaClick={openWA}
               gradiente="linear-gradient(120deg, color-mix(in srgb, var(--v-accent) 50%, transparent), rgba(124,58,237,.08) 50%, rgba(124,58,237,.42))"
+              configPath="products.producto2"
             />
           </div>
 
@@ -280,12 +283,8 @@ function TarjetaAgente({ agente, index, mobile = false }: { agente: { titulo: st
       <div style={{ width: "42px", height: "42px", borderRadius: "50%", display: "grid", placeItems: "center", background: `color-mix(in srgb, ${color} 10%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 22%, transparent)`, color }}>
         {AGENTE_ICONOS[idx]}
       </div>
-      <h4 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "15px", fontWeight: 700, color: "var(--v-text)", lineHeight: "1.2" }}>
-        {agente.titulo}
-      </h4>
-      <p style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: "13px", lineHeight: "1.55", color: "color-mix(in srgb, var(--v-text) 55%, transparent)" }}>
-        {agente.descripcion}
-      </p>
+      <EditableText path={`products.agentes.${index}.titulo`} value={agente.titulo} as="h4" style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "15px", fontWeight: 700, color: "var(--v-text)", lineHeight: "1.2" }} />
+      <EditableText path={`products.agentes.${index}.descripcion`} value={agente.descripcion} as="p" multiline style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: "13px", lineHeight: "1.55", color: "color-mix(in srgb, var(--v-text) 55%, transparent)" }} />
     </div>
   );
 }

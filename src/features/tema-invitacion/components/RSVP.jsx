@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { FaWhatsapp } from 'react-icons/fa'
 import '../styles/RSVP.css'
-import mensajeGif from '../assets/gifs/mensaje.gif'
+import mensajeGifDefault from '../assets/gifs/mensaje.gif'
 import { formatFechaTexto } from '../lib/formatFecha'
 import { supabase } from '@/shared/lib/supabaseClient'
+import { EditableText } from '@/shared/components/EditableText'
+import { EditableImagen } from '@/shared/components/EditableImagen'
+import { useEditable } from '@/shared/components/EditableContext'
 
 export default function RSVP({
   onOpenPrices,
@@ -15,12 +18,14 @@ export default function RSVP({
   botonVerValor = 'VER VALOR TARJETA',
   botonVoyAsistir = 'VOY A ASISTIR',
   botonNoAsistir = 'NO VOY A PODER IR',
+  fotoMensaje = mensajeGifDefault,
   paginaId = null,
 }) {
   const [nombreInvitado, setNombreInvitado] = useState('')
   const [acompanantes, setAcompanantes] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [confirmado, setConfirmado] = useState(null)
+  const { editable } = useEditable()
 
   const mensaje = mensajePlantilla.replace('{nombre}', nombre)
   const waUrl = `https://wa.me/${telefonoWhatsapp}?text=${encodeURIComponent(mensaje)}`
@@ -53,9 +58,9 @@ export default function RSVP({
   return (
     <section className="section rsvp fade-up alignfull" data-aos="fade-up" data-aos-duration="600" data-aos-easing="ease-out" data-aos-once="true">
       <div className="rsvp__row">
-        <img className="rsvp__gif" src={mensajeGif} alt="" aria-hidden="true" />
+        <EditableImagen path="rsvp.fotoMensaje" src={fotoMensaje} alt="" className="rsvp__gif" />
         <div className="rsvp__body">
-          <span className="rsvp__label">{labelConfirmar}</span>
+          <EditableText path="textos.labelConfirmar" value={labelConfirmar} as="span" className="rsvp__label" />
           <p className="rsvp__sub">ANTES DEL {formatFechaTexto(fechaLimiteISO)}</p>
           {paginaId && (
             <div className="rsvp__campos">
@@ -78,7 +83,9 @@ export default function RSVP({
           )}
           <div className="rsvp__actions">
             <button className="rsvp__btn-secondary" onClick={onOpenPrices}>
-              {botonVerValor}
+              <span onClick={(e) => editable && e.stopPropagation()}>
+                <EditableText path="textos.botonVerValor" value={botonVerValor} as="span" />
+              </span>
             </button>
             <button
               type="button"
@@ -87,7 +94,9 @@ export default function RSVP({
               disabled={enviando || faltaNombre}
             >
               <FaWhatsapp aria-hidden="true" />
-              {botonVoyAsistir}
+              <span onClick={(e) => editable && e.stopPropagation()}>
+                <EditableText path="textos.botonVoyAsistir" value={botonVoyAsistir} as="span" />
+              </span>
             </button>
             <button
               type="button"
@@ -95,7 +104,9 @@ export default function RSVP({
               onClick={() => handleConfirmar(false)}
               disabled={enviando || faltaNombre}
             >
-              {botonNoAsistir}
+              <span onClick={(e) => editable && e.stopPropagation()}>
+                <EditableText path="textos.botonNoAsistir" value={botonNoAsistir} as="span" />
+              </span>
             </button>
           </div>
           {confirmado !== null && (

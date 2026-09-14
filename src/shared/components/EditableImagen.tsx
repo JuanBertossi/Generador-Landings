@@ -49,6 +49,49 @@ export function EditableImagen({
 
   if (!editable) return img
 
+  // Sin foto todavía (campo vacío en un config nuevo/en blanco): un <img
+  // src=""> se ve como ícono de imagen rota. Mostramos un placeholder
+  // clickeable en su lugar, con el mismo className/style del caller (así
+  // ocupa el mismo espacio que ocuparía la foto real — clave para los usos
+  // con className="absolute inset-0 ...").
+  if (!src) {
+    return (
+      <>
+        <button
+          type="button"
+          className={className}
+          style={{
+            ...style,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '1px dashed rgba(128,128,128,0.6)',
+            background: 'rgba(128,128,128,0.08)',
+            color: 'rgba(128,128,128,0.9)',
+            cursor: 'pointer',
+            fontSize: 18,
+            lineHeight: 1,
+            padding: 0,
+          }}
+          onClick={() => inputRef.current?.click()}
+          aria-label="Subir imagen"
+        >
+          +
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) onArchivoChange(path, file)
+          }}
+        />
+      </>
+    )
+  }
+
   return (
     <div
       className="editable-imagen"

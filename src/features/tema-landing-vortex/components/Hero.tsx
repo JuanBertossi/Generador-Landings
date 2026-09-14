@@ -3,8 +3,12 @@ import TunnelBackground from "./TunnelBackground";
 import { buildWhatsappUrl } from "../lib/whatsapp";
 import { textoConEnfasis } from "../lib/textoConEnfasis";
 import type { VortexConfig } from "../config";
+import { useEditable } from "@/shared/components/EditableContext";
+import { EditableText } from "@/shared/components/EditableText";
+import { EditableImagen } from "@/shared/components/EditableImagen";
 
 export default function Hero({ config }: { config: VortexConfig }) {
+  const { editable } = useEditable();
   const waLink = buildWhatsappUrl(config.whatsappNumero, config.whatsappMensaje);
 
   return (
@@ -15,8 +19,9 @@ export default function Hero({ config }: { config: VortexConfig }) {
       {config.hero.fondoTipo === "tunel" && (
         <TunnelBackground className="absolute inset-0 w-full h-full z-0" />
       )}
-      {config.hero.fondoTipo === "imagen" && config.hero.fondoUrl && (
-        <img
+      {config.hero.fondoTipo === "imagen" && (config.hero.fondoUrl || editable) && (
+        <EditableImagen
+          path="hero.fondoUrl"
           src={config.hero.fondoUrl}
           alt=""
           className="absolute inset-0 w-full h-full object-cover z-0"
@@ -53,12 +58,13 @@ export default function Hero({ config }: { config: VortexConfig }) {
             className="w-[7px] h-[7px] rounded-full"
             style={{ background: "var(--v-accent)", boxShadow: "0 0 12px var(--v-accent)" }}
           />
-          <span
+          <EditableText
+            path="hero.badge"
+            value={config.hero.badge}
+            as="span"
             className="text-[13px] font-semibold tracking-[.04em]"
             style={{ color: "color-mix(in srgb, var(--v-text) 85%, transparent)" }}
-          >
-            {config.hero.badge}
-          </span>
+          />
         </motion.div>
 
         <motion.h1
@@ -74,7 +80,21 @@ export default function Hero({ config }: { config: VortexConfig }) {
             marginBottom: "26px",
           }}
         >
-          {textoConEnfasis(config.hero.titulo)}
+          <EditableText
+            path="hero.titulo"
+            value={config.hero.titulo}
+            as="h1"
+            multiline
+            render={textoConEnfasis}
+            className="font-bricolage text-white m-0"
+            style={{
+              fontSize: "clamp(36px, 5vw, 66px)",
+              fontWeight: 700,
+              lineHeight: "1.06",
+              letterSpacing: "-0.02em",
+              marginBottom: "26px",
+            }}
+          />
         </motion.h1>
 
         <motion.p
@@ -89,7 +109,19 @@ export default function Hero({ config }: { config: VortexConfig }) {
             marginBottom: "38px",
           }}
         >
-          {config.hero.descripcion}
+          <EditableText
+            path="hero.descripcion"
+            value={config.hero.descripcion}
+            as="p"
+            multiline
+            className="mx-auto max-w-[680px] px-4 sm:px-0"
+            style={{
+              fontSize: "clamp(16px, 1.2vw, 19px)",
+              lineHeight: "1.65",
+              color: "var(--v-text)",
+              marginBottom: "38px",
+            }}
+          />
         </motion.p>
 
         <motion.button
@@ -104,7 +136,9 @@ export default function Hero({ config }: { config: VortexConfig }) {
           }}
           onClick={() => window.open(waLink, "_blank")}
         >
-          {config.hero.ctaLabel}
+          <span onClick={(e) => editable && e.stopPropagation()}>
+            <EditableText path="hero.ctaLabel" value={config.hero.ctaLabel} as="span" />
+          </span>
           <svg
             width="18"
             height="18"

@@ -15,6 +15,7 @@ export interface VortexProducto {
   descripcion: string
   tags: string[]
   ctaLabel: string
+  foto: string
 }
 
 export interface VortexAgente {
@@ -27,7 +28,7 @@ export interface VortexServicio {
   subtitulo: string
   descripcion: string
   ctaLabel: string
-  video: string
+  foto: string
 }
 
 export interface VortexPaso {
@@ -137,6 +138,19 @@ export interface VortexConfig {
     contacto: { email: string; whatsappNumero: string; whatsappTexto: string; direccion: string }
     copyrightTexto: string
   }
+  /** Mostrar/ocultar bloques completos de la landing. Opcional — páginas
+   * publicadas antes de esto no tienen este campo, así que en VortexPage se
+   * lee con `?.` y default `true` (mostrado) si falta. */
+  secciones?: {
+    beneficios: boolean
+    soluciones: boolean
+    servicios: boolean
+    comoEmpezar: boolean
+    beneficiosExtra: boolean
+    casos: boolean
+    preguntas: boolean
+    ctaFinal: boolean
+  }
 }
 
 const MENSAJE_DEMO = '¡Hola! Me interesa conocer más sobre Vortex y cómo puede ayudar a mi empresa.'
@@ -205,6 +219,7 @@ export const vortexDefaultConfig: VortexConfig = {
         'Elimina tareas repetitivas y conecta todos tus sistemas en una sola plataforma inteligente.',
       tags: ['Flujos internos', 'Equipo', 'Sistemas'],
       ctaLabel: 'Explorar Integraciones',
+      foto: '',
     },
     producto2: {
       titulo: 'Clon digital de atención y ventas',
@@ -213,6 +228,7 @@ export const vortexDefaultConfig: VortexConfig = {
         'Tu asistente virtual que nunca duerme. Convierte visitantes en clientes y optimiza cada interacción.',
       tags: ['Reclamos', 'Consultas', 'Turneros'],
       ctaLabel: 'Ver Demo en Vivo',
+      foto: '',
     },
     agentes: [
       {
@@ -242,7 +258,7 @@ export const vortexDefaultConfig: VortexConfig = {
         descripcion:
           'Soluciones personalizadas que se adaptan perfectamente a los procesos únicos de tu empresa.',
         ctaLabel: 'Solicitar Propuesta',
-        video: '/assets/vortex/services/servicio-desarrollo.webm',
+        foto: '',
       },
       {
         titulo: 'Consultoría estratégica',
@@ -250,7 +266,7 @@ export const vortexDefaultConfig: VortexConfig = {
         descripcion:
           'Te guiamos paso a paso para implementar IA de forma estratégica y obtener resultados reales.',
         ctaLabel: 'Agendar Consultoría',
-        video: '/assets/vortex/services/servicio-consultoria.webm',
+        foto: '',
       },
       {
         titulo: 'Capacitación para equipos y software factories',
@@ -258,7 +274,7 @@ export const vortexDefaultConfig: VortexConfig = {
         descripcion:
           'Programas prácticos para que tu equipo domine las herramientas de IA y automatización.',
         ctaLabel: 'Ver Programas',
-        video: '/assets/vortex/services/servicio-capacitacion.webm',
+        foto: '',
       },
     ],
   },
@@ -406,6 +422,16 @@ export const vortexDefaultConfig: VortexConfig = {
     },
     copyrightTexto: '© 2026 Vortex. Todos los derechos reservados.',
   },
+  secciones: {
+    beneficios: true,
+    soluciones: true,
+    servicios: true,
+    comoEmpezar: true,
+    beneficiosExtra: true,
+    casos: true,
+    preguntas: true,
+    ctaFinal: true,
+  },
 }
 
 export const vortexBlankConfig: VortexConfig = {
@@ -448,6 +474,7 @@ export const vortexBlankConfig: VortexConfig = {
       descripcion: 'Descripción del producto.',
       tags: ['Tag 1', 'Tag 2', 'Tag 3'],
       ctaLabel: 'Ver más',
+      foto: '',
     },
     producto2: {
       titulo: 'Producto 2',
@@ -455,6 +482,7 @@ export const vortexBlankConfig: VortexConfig = {
       descripcion: 'Descripción del producto.',
       tags: ['Tag 1', 'Tag 2', 'Tag 3'],
       ctaLabel: 'Ver más',
+      foto: '',
     },
     agentes: [
       { titulo: 'Función 1', descripcion: 'Descripción corta.' },
@@ -471,21 +499,21 @@ export const vortexBlankConfig: VortexConfig = {
         subtitulo: 'Subtítulo corto',
         descripcion: 'Descripción del servicio.',
         ctaLabel: 'Consultar',
-        video: '/assets/vortex/services/servicio-desarrollo.webm',
+        foto: '',
       },
       {
         titulo: 'Servicio 2',
         subtitulo: 'Subtítulo corto',
         descripcion: 'Descripción del servicio.',
         ctaLabel: 'Consultar',
-        video: '/assets/vortex/services/servicio-consultoria.webm',
+        foto: '',
       },
       {
         titulo: 'Servicio 3',
         subtitulo: 'Subtítulo corto',
         descripcion: 'Descripción del servicio.',
         ctaLabel: 'Consultar',
-        video: '/assets/vortex/services/servicio-capacitacion.webm',
+        foto: '',
       },
     ],
   },
@@ -544,5 +572,15 @@ export const vortexBlankConfig: VortexConfig = {
     tituloContacto: 'Contacto',
     contacto: { email: '', whatsappNumero: '', whatsappTexto: '', direccion: '' },
     copyrightTexto: '© 2026 Todos los derechos reservados.',
+  },
+  secciones: {
+    beneficios: true,
+    soluciones: true,
+    servicios: true,
+    comoEmpezar: true,
+    beneficiosExtra: true,
+    casos: true,
+    preguntas: true,
+    ctaFinal: true,
   },
 }

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { textoConEnfasis } from "../lib/textoConEnfasis";
 import type { VortexConfig } from "../config";
+import { EditableText } from "@/shared/components/EditableText";
 
 const SPIN_DURATIONS = ["16s", "18s", "17s", "19s", "15s", "20s"];
 const COLOR_A = "var(--v-accent)";
@@ -23,7 +24,12 @@ export default function BenefitsExtra({ config }: { config: VortexConfig }) {
             viewport={{ once: true }}
             style={{ margin: "0 0 8px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(32px, 5vw, 42px)", fontWeight: 700, letterSpacing: "-.02em", lineHeight: "1.1", color: "var(--v-text)" }}
           >
-            {benefitsExtra.tituloLinea1}
+            <EditableText
+              path="benefitsExtra.tituloLinea1"
+              value={benefitsExtra.tituloLinea1}
+              as="h2"
+              style={{ margin: "0 0 8px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(32px, 5vw, 42px)", fontWeight: 700, letterSpacing: "-.02em", lineHeight: "1.1", color: "var(--v-text)" }}
+            />
           </motion.h2>
 
           <motion.h2
@@ -33,7 +39,14 @@ export default function BenefitsExtra({ config }: { config: VortexConfig }) {
             viewport={{ once: true }}
             style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(32px, 5vw, 42px)", fontWeight: 700, letterSpacing: "-.02em", lineHeight: "1.1", color: "var(--v-text)" }}
           >
-            {textoConEnfasis(benefitsExtra.tituloLinea2)}
+            <EditableText
+              path="benefitsExtra.tituloLinea2"
+              value={benefitsExtra.tituloLinea2}
+              as="h2"
+              multiline
+              render={textoConEnfasis}
+              style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(32px, 5vw, 42px)", fontWeight: 700, letterSpacing: "-.02em", lineHeight: "1.1", color: "var(--v-text)" }}
+            />
           </motion.h2>
         </div>
 
@@ -54,16 +67,25 @@ export default function BenefitsExtra({ config }: { config: VortexConfig }) {
                   <svg width="104" height="104" viewBox="0 0 104 104" style={{ position: "absolute", inset: 0, animation: `vSpin ${SPIN_DURATIONS[index % SPIN_DURATIONS.length]} linear infinite` }}>
                     <circle cx="52" cy="52" r="48" fill="none" stroke={color} strokeWidth="2" strokeDasharray="72 230" strokeLinecap="round" opacity="0.7" />
                   </svg>
-                  <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "28px", fontWeight: 700, color, position: "relative" }}>
-                    {benefit.valor}
-                  </span>
+                  <EditableText
+                    path={`benefitsExtra.items.${index}.valor`}
+                    value={benefit.valor}
+                    as="span"
+                    style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "28px", fontWeight: 700, color, position: "relative" }}
+                  />
                 </div>
-                <h3 style={{ margin: "0 0 8px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "19px", fontWeight: 700, color: "var(--v-text)" }}>
-                  {benefit.titulo}
-                </h3>
-                <p style={{ margin: 0, fontSize: "14.5px", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 60%, transparent)" }}>
-                  {benefit.subtitulo}
-                </p>
+                <EditableText
+                  path={`benefitsExtra.items.${index}.titulo`}
+                  value={benefit.titulo}
+                  as="h3"
+                  style={{ margin: "0 0 8px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "19px", fontWeight: 700, color: "var(--v-text)" }}
+                />
+                <EditableText
+                  path={`benefitsExtra.items.${index}.subtitulo`}
+                  value={benefit.subtitulo}
+                  as="p"
+                  style={{ margin: 0, fontSize: "14.5px", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 60%, transparent)" }}
+                />
               </motion.div>
             );
           })}
@@ -82,16 +104,25 @@ export default function BenefitsExtra({ config }: { config: VortexConfig }) {
                     <svg width="104" height="104" viewBox="0 0 104 104" style={{ position: "absolute", inset: 0, animation: `vSpin ${SPIN_DURATIONS[index % SPIN_DURATIONS.length]} linear infinite` }}>
                       <circle cx="52" cy="52" r="48" fill="none" stroke={color} strokeWidth="2" strokeDasharray="72 230" strokeLinecap="round" opacity="0.7" />
                     </svg>
-                    <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "28px", fontWeight: 700, color, position: "relative" }}>
-                      {benefit.valor}
-                    </span>
+                    <EditableText
+                      path={`benefitsExtra.items.${index}.valor`}
+                      value={benefit.valor}
+                      as="span"
+                      style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "28px", fontWeight: 700, color, position: "relative" }}
+                    />
                   </div>
-                  <h3 style={{ margin: "0 0 8px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "20px", fontWeight: 700, color: "var(--v-text)" }}>
-                    {benefit.titulo}
-                  </h3>
-                  <p style={{ margin: 0, fontSize: "15px", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 60%, transparent)" }}>
-                    {benefit.subtitulo}
-                  </p>
+                  <EditableText
+                    path={`benefitsExtra.items.${index}.titulo`}
+                    value={benefit.titulo}
+                    as="h3"
+                    style={{ margin: "0 0 8px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "20px", fontWeight: 700, color: "var(--v-text)" }}
+                  />
+                  <EditableText
+                    path={`benefitsExtra.items.${index}.subtitulo`}
+                    value={benefit.subtitulo}
+                    as="p"
+                    style={{ margin: 0, fontSize: "15px", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 60%, transparent)" }}
+                  />
                 </div>
               );
             })}

@@ -2,11 +2,16 @@ import { motion } from "framer-motion";
 import { buildWhatsappUrl } from "../lib/whatsapp";
 import { textoConEnfasis } from "../lib/textoConEnfasis";
 import type { VortexConfig } from "../config";
+import { EditableText } from "@/shared/components/EditableText";
+import { EditableImagen } from "@/shared/components/EditableImagen";
+import { useEditable } from "@/shared/components/EditableContext";
 
 const CARD_GRADIENT = "linear-gradient(160deg, rgba(167,139,250,.4), rgba(167,139,250,.18))";
 
 export default function Testimonials({ config }: { config: VortexConfig }) {
   const { testimonials } = config;
+  const { editable, onAgregarContactoBullet } = useEditable();
+  const MAX_CASOS = 4;
   const waLink = buildWhatsappUrl(config.whatsappNumero, config.whatsappMensaje);
 
   return (
@@ -20,9 +25,12 @@ export default function Testimonials({ config }: { config: VortexConfig }) {
             viewport={{ once: true }}
             style={{ display: "inline-flex", alignItems: "center", gap: "9px", marginBottom: "16px" }}
           >
-            <span style={{ fontSize: "13px", fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--v-accent)" }}>
-              {testimonials.eyebrow}
-            </span>
+            <EditableText
+              path="testimonials.eyebrow"
+              value={testimonials.eyebrow}
+              as="span"
+              style={{ fontSize: "13px", fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--v-accent)" }}
+            />
           </motion.div>
 
           <motion.h2
@@ -32,7 +40,14 @@ export default function Testimonials({ config }: { config: VortexConfig }) {
             viewport={{ once: true }}
             style={{ margin: "0 0 14px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(32px, 5vw, 44px)", fontWeight: 700, letterSpacing: "-.02em", lineHeight: "1.1", color: "var(--v-text)" }}
           >
-            {textoConEnfasis(testimonials.titulo)}
+            <EditableText
+              path="testimonials.titulo"
+              value={testimonials.titulo}
+              as="h2"
+              multiline
+              render={textoConEnfasis}
+              style={{ margin: "0 0 14px", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(32px, 5vw, 44px)", fontWeight: 700, letterSpacing: "-.02em", lineHeight: "1.1", color: "var(--v-text)" }}
+            />
           </motion.h2>
 
           <motion.p
@@ -42,11 +57,25 @@ export default function Testimonials({ config }: { config: VortexConfig }) {
             viewport={{ once: true }}
             style={{ margin: "0 auto", maxWidth: "720px", fontFamily: "'Inter', sans-serif", fontSize: "clamp(15px, 1.2vw, 17px)", lineHeight: "1.7", color: "color-mix(in srgb, var(--v-text) 70%, transparent)" }}
           >
-            {testimonials.descripcion}
+            <EditableText
+              path="testimonials.descripcion"
+              value={testimonials.descripcion}
+              as="p"
+              multiline
+              style={{ margin: "0 auto", maxWidth: "720px", fontFamily: "'Inter', sans-serif", fontSize: "clamp(15px, 1.2vw, 17px)", lineHeight: "1.7", color: "color-mix(in srgb, var(--v-text) 70%, transparent)" }}
+            />
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4" style={{ gap: "24px", marginBottom: "48px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 300px))",
+            justifyContent: "center",
+            gap: "24px",
+            marginBottom: "48px",
+          }}
+        >
           {testimonials.items.map((c, index) => (
             <motion.div
               key={index}
@@ -60,8 +89,9 @@ export default function Testimonials({ config }: { config: VortexConfig }) {
               <div
                 style={{ background: "linear-gradient(180deg, var(--v-card-1), var(--v-card-2))", borderRadius: "21px", padding: "30px", height: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "flex-start", textAlign: "left", gap: "18px" }}
               >
-                {c.logoUrl ? (
-                  <img
+                {(c.logoUrl || editable) ? (
+                  <EditableImagen
+                    path={`testimonials.items.${index}.logoUrl`}
                     src={c.logoUrl}
                     alt=""
                     style={{ height: "28px", maxWidth: "140px", objectFit: "contain" }}
@@ -86,7 +116,10 @@ export default function Testimonials({ config }: { config: VortexConfig }) {
                   </div>
                 )}
 
-                <span
+                <EditableText
+                  path={`testimonials.items.${index}.tag`}
+                  value={c.tag}
+                  as="span"
                   style={{
                     fontFamily: "'Bricolage Grotesque', sans-serif",
                     fontSize: "11.5px",
@@ -99,22 +132,50 @@ export default function Testimonials({ config }: { config: VortexConfig }) {
                     borderRadius: "999px",
                     padding: "5px 12px",
                   }}
-                >
-                  {c.tag}
-                </span>
+                />
 
                 <div style={{ width: "100%", height: "1px", background: "color-mix(in srgb, var(--v-text) 9%, transparent)" }} />
 
-                <h3 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "18px", fontWeight: 700, color: "var(--v-text)", lineHeight: "1.25" }}>
-                  {c.titulo}
-                </h3>
+                <EditableText
+                  path={`testimonials.items.${index}.titulo`}
+                  value={c.titulo}
+                  as="h3"
+                  style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "18px", fontWeight: 700, color: "var(--v-text)", lineHeight: "1.25" }}
+                />
 
-                <p style={{ margin: 0, fontSize: "14px", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 55%, transparent)" }}>
-                  {c.descripcion}
-                </p>
+                <EditableText
+                  path={`testimonials.items.${index}.descripcion`}
+                  value={c.descripcion}
+                  as="p"
+                  multiline
+                  style={{ margin: 0, fontSize: "14px", lineHeight: "1.6", color: "color-mix(in srgb, var(--v-text) 55%, transparent)" }}
+                />
               </div>
             </motion.div>
           ))}
+
+          {editable && testimonials.items.length < MAX_CASOS && (
+            <button
+              type="button"
+              onClick={onAgregarContactoBullet}
+              aria-label="Agregar caso de éxito"
+              style={{
+                borderRadius: "22px",
+                border: "1px dashed color-mix(in srgb, var(--v-text) 30%, transparent)",
+                background: "transparent",
+                color: "color-mix(in srgb, var(--v-text) 45%, transparent)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: "220px",
+                fontSize: "36px",
+                lineHeight: 1,
+              }}
+            >
+              +
+            </button>
+          )}
         </div>
 
         <motion.div
@@ -130,7 +191,9 @@ export default function Testimonials({ config }: { config: VortexConfig }) {
             style={{ padding: "15px 32px", borderRadius: "999px", border: "none", cursor: "pointer", fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "16px", fontWeight: 700 }}
             onClick={() => window.open(waLink, "_blank")}
           >
-            {testimonials.ctaLabel}
+            <span onClick={(e) => editable && e.stopPropagation()}>
+              <EditableText path="testimonials.ctaLabel" value={testimonials.ctaLabel} as="span" />
+            </span>
           </button>
         </motion.div>
       </div>
