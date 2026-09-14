@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { FleepixLogo } from '@/features/tema-landing-fleepix/shared/components/icons/FleepixLogo'
 import { buildWhatsappUrl } from '@/features/tema-landing-fleepix/shared/lib/whatsapp'
 import type { LandingFleepixConfig } from '../config'
 import { EditableText } from '@/shared/components/EditableText'
@@ -23,7 +22,12 @@ export function Navbar({ config }: { config: LandingFleepixConfig }) {
               className="h-6 w-auto min-w-[56px] block"
             />
           ) : (
-            <FleepixLogo variant="light" className="h-6 w-auto block" />
+            // Sin logo propio subido: mostramos el nombre de la empresa como
+            // texto, no el isotipo de Fleepix — ese es nuestro branding, no
+            // el del cliente, no puede quedar en su sitio publicado.
+            <span className="font-['Sora'] font-bold text-lg text-[var(--neutro-100)]" style={{ color: 'var(--neutro-100)' }}>
+              {config.identidad.nombreEmpresa}
+            </span>
           )}
         </a>
         <div className="flex items-center gap-[30px] max-[900px]:hidden">

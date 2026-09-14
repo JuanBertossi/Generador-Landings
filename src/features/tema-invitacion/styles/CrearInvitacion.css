@@ -135,6 +135,21 @@
   min-height: 60px;
 }
 
+.crear-invitacion__ayuda {
+  font-size: 12.5px;
+  opacity: 0.55;
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.crear-invitacion__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
 .crear-invitacion__precio-row {
   display: grid;
   grid-template-columns: 1fr 1fr auto;

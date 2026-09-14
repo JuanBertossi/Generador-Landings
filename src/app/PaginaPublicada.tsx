@@ -1,6 +1,7 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense } from 'react'
 import { useParams } from 'react-router-dom'
-import { supabase } from '@/shared/lib/supabaseClient'
+import { useQuery } from '@tanstack/react-query'
+import { obtenerPaginaPublica } from '@/shared/api/paginas.service'
 import { ErrorBoundary } from '@/shared/components/ErrorBoundary'
 
 const InvitacionPageLazy = lazy(() => import('@/features/tema-invitacion/InvitacionPage.jsx'))
@@ -20,29 +21,22 @@ type PaginaRow = {
 /** Lee una página publicada por su slug y renderiza el tema que corresponda. */
 export function PaginaPublicada() {
   const { slug } = useParams<{ slug: string }>()
-  // undefined = cargando, null = no existe / no está publicada
-  const [pagina, setPagina] = useState<PaginaRow | null | undefined>(undefined)
 
-  useEffect(() => {
-    let cancelado = false
-    async function cargar() {
-      setPagina(undefined)
-      const { data, error } = await supabase.rpc('obtener_pagina_publica', { p_slug: slug })
-      if (cancelado) return
-      const fila = Array.isArray(data) ? data[0] : null
-      setPagina(error || !fila ? null : (fila as PaginaRow))
-    }
-    cargar()
-    return () => {
-      cancelado = true
-    }
-  }, [slug])
+  const query = useQuery({
+    queryKey: ['pagina-publica', slug],
+    queryFn: () => obtenerPaginaPublica<PaginaRow['data']>(slug as string),
+    enabled: !!slug,
+    staleTime: Infinity,
+    retry: false,
+  })
 
-  if (pagina === undefined) {
+  if (query.isLoading) {
     return <div className="pagina-publicada__estado">Cargando…</div>
   }
 
-  if (pagina === null) {
+  const pagina = query.data as PaginaRow | null | undefined
+
+  if (!pagina) {
     return (
       <div className="pagina-publicada__estado">
         <p>No encontramos esta página. Puede que el link esté mal o que ya no esté disponible.</p>

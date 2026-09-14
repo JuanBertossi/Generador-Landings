@@ -59,6 +59,16 @@ export const invitacionDefaultConfig = {
   fotoCuando: fotoCuandoDefault,
   fotoDonde: fotoDondeDefault,
 
+  // Mostrar/ocultar bloques completos de la invitación. Opcional — páginas
+  // publicadas antes de esto no tienen este campo, así que en InvitacionPage
+  // se lee con `?.` y default `true` (mostrado) si falta.
+  secciones: {
+    eventInfo: true,
+    birthdaySection: true,
+    quote: true,
+    rsvp: true,
+  },
+
   // Textos fijos de la interfaz (botones, títulos de sección) — editables
   // para poder adaptar el tono (cumpleaños vs casamiento vs baby shower).
   textos: {
@@ -115,6 +125,12 @@ export const invitacionBlankConfig = {
   fotoPrincipal: '',
   fotoCuando: fotoCuandoDefault,
   fotoDonde: fotoDondeDefault,
+  secciones: {
+    eventInfo: true,
+    birthdaySection: true,
+    quote: true,
+    rsvp: true,
+  },
   textos: {
     botonIngresar: 'INGRESAR',
     labelCuando: '¿CUÁNDO?',

@@ -124,6 +124,16 @@ export interface LandingFleepixConfig {
     /** "Un producto de GoodApps" + logo — atribución de la plataforma, no del cliente */
     mostrarSelloGoodApps: boolean
   }
+  /** Mostrar/ocultar bloques completos de la landing. Opcional — páginas
+   * publicadas antes de esto no tienen este campo, así que en LandingPage se
+   * lee con `?.` y default `true` (mostrado) si falta. */
+  secciones?: {
+    paraQuien: boolean
+    beneficios: boolean
+    funcionalidades: boolean
+    faq: boolean
+    contacto: boolean
+  }
 }
 
 export const fleepixDefaultConfig: LandingFleepixConfig = {
@@ -320,6 +330,13 @@ export const fleepixDefaultConfig: LandingFleepixConfig = {
     copyrightTexto: '© 2026 Fleepix. Todos los derechos reservados',
     mostrarSelloGoodApps: false,
   },
+  secciones: {
+    paraQuien: true,
+    beneficios: true,
+    funcionalidades: true,
+    faq: true,
+    contacto: true,
+  },
 }
 
 export const fleepixBlankConfig: LandingFleepixConfig = {
@@ -414,5 +431,12 @@ export const fleepixBlankConfig: LandingFleepixConfig = {
     redes: { instagram: '', linkedin: '', facebook: '' },
     copyrightTexto: '© 2026 Todos los derechos reservados',
     mostrarSelloGoodApps: false,
+  },
+  secciones: {
+    paraQuien: true,
+    beneficios: true,
+    funcionalidades: true,
+    faq: true,
+    contacto: true,
   },
 }

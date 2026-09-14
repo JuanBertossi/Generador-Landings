@@ -32,6 +32,9 @@ export default function InvitacionPage({
   }, [])
 
   const coloresPersonalizados = derivarPaleta(config.apariencia)
+  // Páginas publicadas antes de esta feature no tienen `secciones` guardado
+  // todavía — sin el campo, cada bloque se sigue mostrando (default true).
+  const mostrar = (clave) => config.secciones?.[clave] !== false
 
   return (
     <EditableProvider
@@ -64,34 +67,40 @@ export default function InvitacionPage({
               fechaHoraISO={config.evento.fechaHoraISO}
               fotoPrincipal={config.fotoPrincipal}
             />
-            <EventInfo
-              fechaHoraISO={config.evento.fechaHoraISO}
-              lugarNombre={config.evento.lugarNombre}
-              lugarMapsLink={config.evento.lugarMapsLink}
-              labelCuando={config.textos.labelCuando}
-              labelDonde={config.textos.labelDonde}
-              botonComoLlegar={config.textos.botonComoLlegar}
-              fotoCuando={config.fotoCuando}
-              fotoDonde={config.fotoDonde}
-            />
-            <BirthdaySection
-              tituloDestacado={config.tituloDestacado}
-              fotoPrincipal={config.fotoPrincipal}
-            />
-            <Quote texto={config.frase} />
-            <RSVP
-              onOpenPrices={() => setPriceOpen(true)}
-              nombre={config.anfitrion.nombre}
-              telefonoWhatsapp={config.rsvp.telefonoWhatsapp}
-              mensajePlantilla={config.rsvp.mensajePlantilla}
-              fechaLimiteISO={config.rsvp.fechaLimiteISO}
-              labelConfirmar={config.textos.labelConfirmar}
-              botonVerValor={config.textos.botonVerValor}
-              botonVoyAsistir={config.textos.botonVoyAsistir}
-              botonNoAsistir={config.textos.botonNoAsistir}
-              fotoMensaje={config.rsvp.fotoMensaje}
-              paginaId={paginaId}
-            />
+            {mostrar('eventInfo') && (
+              <EventInfo
+                fechaHoraISO={config.evento.fechaHoraISO}
+                lugarNombre={config.evento.lugarNombre}
+                lugarMapsLink={config.evento.lugarMapsLink}
+                labelCuando={config.textos.labelCuando}
+                labelDonde={config.textos.labelDonde}
+                botonComoLlegar={config.textos.botonComoLlegar}
+                fotoCuando={config.fotoCuando}
+                fotoDonde={config.fotoDonde}
+              />
+            )}
+            {mostrar('birthdaySection') && (
+              <BirthdaySection
+                tituloDestacado={config.tituloDestacado}
+                fotoPrincipal={config.fotoPrincipal}
+              />
+            )}
+            {mostrar('quote') && <Quote texto={config.frase} />}
+            {mostrar('rsvp') && (
+              <RSVP
+                onOpenPrices={() => setPriceOpen(true)}
+                nombre={config.anfitrion.nombre}
+                telefonoWhatsapp={config.rsvp.telefonoWhatsapp}
+                mensajePlantilla={config.rsvp.mensajePlantilla}
+                fechaLimiteISO={config.rsvp.fechaLimiteISO}
+                labelConfirmar={config.textos.labelConfirmar}
+                botonVerValor={config.textos.botonVerValor}
+                botonVoyAsistir={config.textos.botonVoyAsistir}
+                botonNoAsistir={config.textos.botonNoAsistir}
+                fotoMensaje={config.rsvp.fotoMensaje}
+                paginaId={paginaId}
+              />
+            )}
             <Footer titulo={config.footer.titulo} fotoFondo={config.footer.fotoFondo} />
 
             {priceOpen && (

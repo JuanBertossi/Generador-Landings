@@ -47,6 +47,9 @@ export default function LandingPage({
   }, [])
 
   const coloresPersonalizados = derivarPaleta(config.apariencia)
+  // Páginas publicadas antes de esta feature no tienen `secciones` guardado
+  // todavía — sin el campo, cada bloque se sigue mostrando (default true).
+  const mostrar = (clave: keyof NonNullable<LandingFleepixConfig['secciones']>) => config.secciones?.[clave] !== false
 
   return (
     <EditableProvider
@@ -63,11 +66,11 @@ export default function LandingPage({
       <div id="site" ref={proteccionRef} style={coloresPersonalizados}>
         <Navbar config={config} />
         <Hero config={config} />
-        <ParaQuien config={config} />
-        <Beneficios config={config} />
-        <Funcionalidades config={config} />
-        <Faq config={config} />
-        <ContactForm config={config} paginaId={paginaId} />
+        {mostrar('paraQuien') && <ParaQuien config={config} />}
+        {mostrar('beneficios') && <Beneficios config={config} />}
+        {mostrar('funcionalidades') && <Funcionalidades config={config} />}
+        {mostrar('faq') && <Faq config={config} />}
+        {mostrar('contacto') && <ContactForm config={config} paginaId={paginaId} />}
         <Footer config={config} />
       </div>
     </EditableProvider>

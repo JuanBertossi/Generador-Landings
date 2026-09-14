@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
+import { useForm, useFieldArray, type FieldErrors, type FieldErrorsImpl } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import './styles/CrearInvitacion.css'
 import InvitacionPage from './InvitacionPage.jsx'
 import { invitacionBlankConfig } from './config.js'
-import { setPath, getPath } from '@/shared/lib/objectPath'
+import { invitacionSchema, type InvitacionFormData } from './schemas/invitacion.schema'
+import { getPath } from '@/shared/lib/objectPath'
 import { slugify } from '@/shared/lib/slugify'
 import { PRECIOS, formatoPrecio } from '@/shared/lib/precios'
 import { usePaginaPersistida } from '@/shared/hooks/usePaginaPersistida'
@@ -12,10 +15,30 @@ import { urlPublicada, DOMINIO_BASE } from '@/shared/lib/dominio'
 import { MobilePreviewFrame } from '@/shared/components/MobilePreviewFrame'
 import { Bookmark, CheckCircle2, Copy, Check, AlertCircle, Globe, Monitor, Smartphone } from 'lucide-react'
 
-function Field({ label, path, config, onChange, type = 'text', textarea = false }) {
-  const value = getPath(config, path) ?? ''
-  const handleChange = (e) => onChange(path, e.target.value)
+const SECCIONES: { key: keyof NonNullable<InvitacionFormData['secciones']>; label: string }[] = [
+  { key: 'eventInfo', label: 'Fecha y lugar' },
+  { key: 'birthdaySection', label: 'Sección destacada con foto' },
+  { key: 'quote', label: 'Frase/cita' },
+  { key: 'rsvp', label: 'Confirmación de asistencia' },
+]
 
+function Field({
+  label,
+  path,
+  config,
+  onChange,
+  type = 'text',
+  textarea = false,
+}: {
+  label: string
+  path: string
+  config: InvitacionFormData
+  onChange: (path: string, value: string) => void
+  type?: string
+  textarea?: boolean
+}) {
+  const value = (getPath(config, path) as string) ?? ''
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(path, e.target.value)
   return (
     <div className="crear-invitacion__field">
       <label htmlFor={path}>{label}</label>
@@ -28,8 +51,18 @@ function Field({ label, path, config, onChange, type = 'text', textarea = false 
   )
 }
 
-function CampoColor({ label, path, config, onChange }) {
-  const value = getPath(config, path) ?? '#000000'
+function CampoColor({
+  label,
+  path,
+  config,
+  onChange,
+}: {
+  label: string
+  path: string
+  config: InvitacionFormData
+  onChange: (path: string, value: string) => void
+}) {
+  const value = (getPath(config, path) as string) ?? '#000000'
   return (
     <div className="crear-invitacion__field crear-invitacion__field--color">
       <label htmlFor={path}>{label}</label>
@@ -41,18 +74,79 @@ function CampoColor({ label, path, config, onChange }) {
   )
 }
 
+function primerMensajeError(errors: FieldErrors<InvitacionFormData> | FieldErrorsImpl | undefined): string | undefined {
+  if (!errors) return undefined
+  const conMensaje = errors as { message?: unknown }
+  if (typeof conMensaje.message === 'string') return conMensaje.message
+  for (const key of Object.keys(errors)) {
+    const msg = primerMensajeError((errors as Record<string, FieldErrorsImpl>)[key])
+    if (msg) return msg
+  }
+  return undefined
+}
+
 export default function CrearInvitacionPage() {
-  const { config, setConfig, cargando, guardando, error, publicar } = usePaginaPersistida(
+  const { datosIniciales, cargando, guardando, error, publicar, guardarDebounced } = usePaginaPersistida<InvitacionFormData>(
     'invitacion',
-    invitacionBlankConfig,
+    invitacionBlankConfig as InvitacionFormData,
     '/crear/invitacion',
   )
-  const [resultado, setResultado] = useState(null)
+
+  if (error) {
+    return (
+      <div className="crear-invitacion__error-pantalla">
+        <AlertCircle size={32} strokeWidth={1.5} />
+        <p>{error}</p>
+        <a href="/">Volver al inicio</a>
+      </div>
+    )
+  }
+
+  if (cargando || !datosIniciales) {
+    return <div className="crear-invitacion__error-pantalla">Cargando tu página…</div>
+  }
+
+  return (
+    <CrearInvitacionForm
+      datosIniciales={datosIniciales}
+      guardando={guardando}
+      publicar={publicar}
+      guardarDebounced={guardarDebounced}
+    />
+  )
+}
+
+function CrearInvitacionForm({
+  datosIniciales,
+  guardando,
+  publicar,
+  guardarDebounced,
+}: {
+  datosIniciales: InvitacionFormData
+  guardando: boolean
+  publicar: (slug: string, montoPagado: number) => Promise<void>
+  guardarDebounced: (data: InvitacionFormData) => void
+}) {
+  const { watch, setValue, handleSubmit, control } = useForm<InvitacionFormData>({
+    defaultValues: datosIniciales,
+    resolver: zodResolver(invitacionSchema),
+  })
+  const config = watch()
+  const preciosFieldArray = useFieldArray({ control, name: 'precios' })
+
+  const [resultado, setResultado] = useState<{ slug: string; url: string } | null>(null)
   const [publicando, setPublicando] = useState(false)
-  const [errorPublicar, setErrorPublicar] = useState(null)
+  const [errorPublicar, setErrorPublicar] = useState<string | null>(null)
   const [copiado, setCopiado] = useState(false)
   const [vistaMobile, setVistaMobile] = useState(false)
   const linkEdicion = typeof window !== 'undefined' ? window.location.href : ''
+
+  useEffect(() => {
+    const subscription = watch((value) => {
+      guardarDebounced(value as InvitacionFormData)
+    })
+    return () => subscription.unsubscribe()
+  }, [watch, guardarDebounced])
 
   function handleCopiarLink() {
     navigator.clipboard.writeText(linkEdicion).then(() => {
@@ -61,22 +155,10 @@ export default function CrearInvitacionPage() {
     })
   }
 
-  async function handleGenerar() {
-    if (!config.anfitrion.nombre.trim()) {
-      setErrorPublicar('Falta el nombre de quién festeja.')
-      return
-    }
-    if (!config.evento.fechaHoraISO) {
-      setErrorPublicar('Falta la fecha y hora del evento.')
-      return
-    }
-    if (!config.rsvp.fechaLimiteISO) {
-      setErrorPublicar('Falta la fecha límite para confirmar asistencia.')
-      return
-    }
+  async function onGenerarValido(data: InvitacionFormData) {
     setPublicando(true)
     setErrorPublicar(null)
-    let slug = slugify(config.anfitrion.nombre)
+    let slug = slugify(data.anfitrion.nombre)
     try {
       try {
         await publicar(slug, PRECIOS.invitacion)
@@ -92,54 +174,42 @@ export default function CrearInvitacionPage() {
     }
   }
 
-  function handleChange(path, value) {
-    setConfig((prev) => setPath(prev, path, value))
+  function onGenerarInvalido(errors: FieldErrors<InvitacionFormData>) {
+    setErrorPublicar(primerMensajeError(errors) ?? 'Revisá los campos del formulario.')
   }
 
-  function handleArchivoGenerico(path, file) {
-    const anterior = getPath(config, path)
-    setConfig((prev) => setPath(prev, path, URL.createObjectURL(file)))
+  function handleChange(path: string, value: string) {
+    setValue(path as Parameters<typeof setValue>[0], value, { shouldDirty: true })
+  }
+
+  function handleSeccionToggle(key: string, value: boolean) {
+    setValue(`secciones.${key}` as Parameters<typeof setValue>[0], value as never, { shouldDirty: true })
+  }
+
+  function handleArchivoGenerico(path: string, file: File) {
+    const anterior = getPath(config, path) as string | undefined
+    setValue(path as Parameters<typeof setValue>[0], URL.createObjectURL(file), { shouldDirty: true })
     subirArchivo(file)
       .then((url) => {
-        setConfig((prev) => setPath(prev, path, url))
+        setValue(path as Parameters<typeof setValue>[0], url, { shouldDirty: true })
         eliminarArchivo(anterior)
       })
       .catch(() => {
-        setConfig((prev) => setPath(prev, path, anterior ?? ''))
+        setValue(path as Parameters<typeof setValue>[0], anterior ?? '', { shouldDirty: true })
         setErrorPublicar('No pudimos subir la foto. Probá de nuevo.')
       })
   }
 
-  function handlePrecioChange(index, campo, value) {
-    setConfig((prev) => {
-      const precios = [...prev.precios]
-      precios[index] = { ...precios[index], [campo]: value }
-      return { ...prev, precios }
-    })
+  function handlePrecioChange(index: number, campo: 'categoria' | 'precio', value: string) {
+    handleChange(`precios.${index}.${campo}`, value)
   }
 
   function agregarPrecio() {
-    setConfig((prev) => ({
-      ...prev,
-      precios: [...prev.precios, { categoria: '', precio: '' }],
-    }))
+    preciosFieldArray.append({ categoria: '', precio: '' })
   }
 
-  function quitarPrecio(index) {
-    setConfig((prev) => ({
-      ...prev,
-      precios: prev.precios.filter((_, i) => i !== index),
-    }))
-  }
-
-  if (error) {
-    return (
-      <div className="crear-invitacion__error-pantalla">
-        <AlertCircle size={32} strokeWidth={1.5} />
-        <p>{error}</p>
-        <a href="/">Volver al inicio</a>
-      </div>
-    )
+  function quitarPrecio(index: number) {
+    preciosFieldArray.remove(index)
   }
 
   return (
@@ -157,14 +227,12 @@ export default function CrearInvitacionPage() {
         <h1>Armá tu invitación</h1>
         <p>
           Vas viendo el resultado a la derecha, en tiempo real. Hacé clic sobre cualquier texto o foto de la vista previa para editarlo directamente.
-          {cargando ? ' Cargando tu página…' : guardando ? ' Guardando…' : ' Guardado.'}
+          {guardando ? ' Guardando…' : ' Guardado.'}
         </p>
-        {!cargando && (
-          <p className="crear-invitacion__aviso-link">
-            <Bookmark size={15} strokeWidth={2} />
-            <span><strong>No hay usuario ni contraseña</strong> — este link ES tu forma de entrar. Guardalo como favorito o mandátelo por WhatsApp a vos mismo, si no lo perdés el acceso a tu invitación.</span>
-          </p>
-        )}
+        <p className="crear-invitacion__aviso-link">
+          <Bookmark size={15} strokeWidth={2} />
+          <span><strong>No hay usuario ni contraseña</strong> — este link ES tu forma de entrar. Guardalo como favorito o mandátelo por WhatsApp a vos mismo, si no lo perdés el acceso a tu invitación.</span>
+        </p>
 
         <fieldset className="crear-invitacion__fieldset">
           <legend>Quién festeja</legend>
@@ -199,6 +267,21 @@ export default function CrearInvitacionPage() {
         </fieldset>
 
         <fieldset className="crear-invitacion__fieldset">
+          <legend>Secciones visibles</legend>
+          <p className="crear-invitacion__ayuda">Destildá para ocultar un bloque completo de la invitación — se puede volver a mostrar cuando quieras.</p>
+          {SECCIONES.map(({ key, label }) => (
+            <label className="crear-invitacion__check" key={key}>
+              <input
+                type="checkbox"
+                checked={config.secciones?.[key] ?? true}
+                onChange={(e) => handleSeccionToggle(key, e.target.checked)}
+              />
+              {label}
+            </label>
+          ))}
+        </fieldset>
+
+        <fieldset className="crear-invitacion__fieldset">
           <legend>Confirmación por WhatsApp</legend>
           <Field label="Tu WhatsApp (con código de país, sin +)" path="rsvp.telefonoWhatsapp" config={config} onChange={handleChange} />
           <Field label="Mensaje pre-cargado (usá {nombre} para el nombre del festejado)" path="rsvp.mensajePlantilla" config={config} onChange={handleChange} textarea />
@@ -222,16 +305,16 @@ export default function CrearInvitacionPage() {
 
         <fieldset className="crear-invitacion__fieldset">
           <legend>Precio de entrada</legend>
-          {config.precios.map((p, i) => (
-            <div className="crear-invitacion__precio-row" key={i}>
+          {preciosFieldArray.fields.map((field, i) => (
+            <div className="crear-invitacion__precio-row" key={field.id}>
               <input
                 placeholder="Categoría"
-                value={p.categoria}
+                value={config.precios?.[i]?.categoria ?? ''}
                 onChange={(e) => handlePrecioChange(i, 'categoria', e.target.value)}
               />
               <input
                 placeholder="Precio"
-                value={p.precio}
+                value={config.precios?.[i]?.precio ?? ''}
                 onChange={(e) => handlePrecioChange(i, 'precio', e.target.value)}
               />
               <button type="button" className="crear-invitacion__btn-quitar" onClick={() => quitarPrecio(i)} aria-label="Quitar categoría de precio">
@@ -261,7 +344,7 @@ export default function CrearInvitacionPage() {
           <strong>Gratis</strong> por tiempo limitado
         </p>
         {errorPublicar && <p className="crear-invitacion__error">{errorPublicar}</p>}
-        <button type="button" className="crear-invitacion__btn-generar" onClick={handleGenerar} disabled={publicando}>
+        <button type="button" className="crear-invitacion__btn-generar" onClick={handleSubmit(onGenerarValido, onGenerarInvalido)} disabled={publicando}>
           {publicando ? 'Generando…' : 'Generar invitación'}
         </button>
 

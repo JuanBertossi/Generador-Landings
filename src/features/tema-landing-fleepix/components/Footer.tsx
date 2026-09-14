@@ -1,6 +1,5 @@
 import { Mail, Phone, MapPin, Code2 } from 'lucide-react'
 import { Reveal } from '@/features/tema-landing-fleepix/shared/components/Reveal'
-import { FleepixLogo } from '@/features/tema-landing-fleepix/shared/components/icons/FleepixLogo'
 import goodAppsLogo from '@/features/tema-landing-fleepix/shared/assets/footer/logo-goodapps.svg'
 import { buildWhatsappUrl } from '@/features/tema-landing-fleepix/shared/lib/whatsapp'
 import type { LandingFleepixConfig } from '../config'
@@ -29,10 +28,15 @@ export function Footer({ config }: { config: LandingFleepixConfig }) {
                 className="block h-10 w-auto min-w-[70px] mb-[22px] -ml-3.5 origin-left transition-transform duration-[250ms] hover:scale-[1.08]"
               />
             ) : (
-              <FleepixLogo
-                variant="light"
-                className="block h-10 w-auto mb-[22px] -ml-3.5 origin-left transition-transform duration-[250ms] hover:scale-[1.08]"
-              />
+              // Sin logo propio subido: mostramos el nombre de la empresa
+              // como texto, no el isotipo de Fleepix — no es el branding
+              // del cliente, no puede quedar en su sitio publicado.
+              <span
+                className="block font-['Sora'] font-bold text-2xl mb-[22px] text-[var(--neutro-100)]"
+                style={{ color: 'var(--neutro-100)' }}
+              >
+                {identidad.nombreEmpresa}
+              </span>
             )}
             <p className="text-[13.5px] leading-[1.6] text-[var(--navy-200)] max-w-[34ch] m-0">
               <EditableText path="footer.descripcion" value={footer.descripcion} as="span" multiline />

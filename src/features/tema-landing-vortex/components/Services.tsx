@@ -21,6 +21,10 @@ export default function Services({ config }: { config: VortexConfig }) {
   const { editable } = useEditable();
   const totalSlides = services.items.length;
   const touchStartX = useRef(0);
+  // Ver comentario equivalente en Products.tsx — mouse no dispara touch
+  // events, así que en la vista Mobile del editor este carrusel no se podía
+  // arrastrar con mouse.
+  const mouseStartX = useRef<number | null>(null);
   const openWA = () => window.open(buildWhatsappUrl(config.whatsappNumero, config.whatsappMensaje), "_blank");
 
   const nextSlide = () => setSlide((prev) => (prev + 1) % totalSlides);
@@ -60,6 +64,14 @@ export default function Services({ config }: { config: VortexConfig }) {
                 const diff = touchStartX.current - e.changedTouches[0].clientX;
                 if (diff > 50) nextSlide();
                 if (diff < -50) prevSlide();
+              }}
+              onMouseDown={(e) => { mouseStartX.current = e.clientX; }}
+              onMouseUp={(e) => {
+                if (mouseStartX.current === null) return;
+                const diff = mouseStartX.current - e.clientX;
+                if (diff > 50) nextSlide();
+                if (diff < -50) prevSlide();
+                mouseStartX.current = null;
               }}
             >
               {services.items.map((servicio, index) => {

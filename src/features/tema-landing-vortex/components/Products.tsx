@@ -147,6 +147,11 @@ function TarjetaProducto({
 export default function Products({ config }: { config: VortexConfig }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const touchStartX = useRef(0);
+  // El mouse no puede "swipear" como el dedo — el touch handler de abajo no
+  // dispara con mouse, así que en la vista Mobile del editor (se navega con
+  // mouse, no con dedo) este carrusel quedaba sin forma de cambiar de slide
+  // salvo los puntitos. Espejo del touch handler pero con mousedown/mouseup.
+  const mouseStartX = useRef<number | null>(null);
   const { products } = config;
   const openWA = () => window.open(buildWhatsappUrl(config.whatsappNumero, config.whatsappMensaje), "_blank");
 
@@ -186,6 +191,14 @@ export default function Products({ config }: { config: VortexConfig }) {
             const diff = touchStartX.current - e.changedTouches[0].clientX;
             if (diff > 50) setActiveSlide(1);
             if (diff < -50) setActiveSlide(0);
+          }}
+          onMouseDown={(e) => { mouseStartX.current = e.clientX; }}
+          onMouseUp={(e) => {
+            if (mouseStartX.current === null) return;
+            const diff = mouseStartX.current - e.clientX;
+            if (diff > 50) setActiveSlide(1);
+            if (diff < -50) setActiveSlide(0);
+            mouseStartX.current = null;
           }}
         >
           <div className="grid sm:contents">

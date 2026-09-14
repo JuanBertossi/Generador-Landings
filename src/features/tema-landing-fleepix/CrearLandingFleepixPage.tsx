@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
+import { useForm, useFieldArray, type FieldErrors, type FieldErrorsImpl } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import './styles/CrearLandingFleepix.css'
 import LandingPage from './views/LandingPage'
-import { fleepixBlankConfig, type LandingFleepixConfig } from './config'
+import { fleepixBlankConfig } from './config'
+import { landingFleepixSchema, type LandingFleepixFormData } from './schemas/landingFleepix.schema'
 import { ICONOS } from './lib/iconos'
-import { setPath, getPath } from '@/shared/lib/objectPath'
+import { getPath } from '@/shared/lib/objectPath'
 import { slugify } from '@/shared/lib/slugify'
 import { PRECIOS, formatoPrecio } from '@/shared/lib/precios'
 import { usePaginaPersistida } from '@/shared/hooks/usePaginaPersistida'
@@ -15,10 +18,19 @@ import { Bookmark, CheckCircle2, Copy, Check, AlertCircle, Globe, Monitor, Smart
 
 const OPCIONES_ICONO = Object.keys(ICONOS)
 
+const SECCIONES: { key: keyof NonNullable<LandingFleepixFormData['secciones']>; label: string }[] = [
+  { key: 'paraQuien', label: '¿Para quién?' },
+  { key: 'beneficios', label: 'Beneficios' },
+  { key: 'funcionalidades', label: 'Funcionalidades' },
+  { key: 'faq', label: 'Preguntas frecuentes' },
+  { key: 'contacto', label: 'Contacto' },
+]
+
 // El config en blanco arranca con fotos de stock precargadas (mismo look
 // que el ejemplo) — si alguien publica sin tocar ninguna, su landing es un
 // calco del template. Antes de publicar, exigimos que TODAS hayan sido
-// reemplazadas por una foto propia.
+// reemplazadas por una foto propia. Esto compara contra fleepixBlankConfig,
+// no se puede expresar como regla de schema — sigue siendo un chequeo aparte.
 const FOTOS_A_VALIDAR: { path: string; label: string }[] = [
   { path: 'hero.fotoPrincipal', label: 'Foto principal del hero' },
   { path: 'hero.fotoSecundaria', label: 'Foto secundaria del hero' },
@@ -32,7 +44,7 @@ const FOTOS_A_VALIDAR: { path: string; label: string }[] = [
   { path: 'funcionalidades.items.5.foto', label: 'Foto de Funcionalidad 6' },
 ]
 
-function fotosSinCambiar(config: LandingFleepixConfig): string[] {
+function fotosSinCambiar(config: LandingFleepixFormData): string[] {
   return FOTOS_A_VALIDAR.filter(({ path }) => getPath(config, path) === getPath(fleepixBlankConfig, path)).map(
     ({ label }) => label,
   )
@@ -48,19 +60,20 @@ function Field({
 }: {
   label: string
   path: string
-  config: LandingFleepixConfig
+  config: LandingFleepixFormData
   onChange: (path: string, value: string) => void
   textarea?: boolean
   placeholder?: string
 }) {
   const value = (getPath(config, path) as string) ?? ''
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(path, e.target.value)
   return (
     <div className="crear-landing__field">
       <label htmlFor={path}>{label}</label>
       {textarea ? (
-        <textarea id={path} value={value} placeholder={placeholder} onChange={(e) => onChange(path, e.target.value)} />
+        <textarea id={path} value={value} placeholder={placeholder} onChange={handleChange} />
       ) : (
-        <input id={path} type="text" value={value} placeholder={placeholder} onChange={(e) => onChange(path, e.target.value)} />
+        <input id={path} type="text" value={value} placeholder={placeholder} onChange={handleChange} />
       )}
     </div>
   )
@@ -74,7 +87,7 @@ function CampoColor({
 }: {
   label: string
   path: string
-  config: LandingFleepixConfig
+  config: LandingFleepixFormData
   onChange: (path: string, value: string) => void
 }) {
   const value = (getPath(config, path) as string) ?? '#000000'
@@ -89,18 +102,79 @@ function CampoColor({
   )
 }
 
+function primerMensajeError(errors: FieldErrors<LandingFleepixFormData> | FieldErrorsImpl | undefined): string | undefined {
+  if (!errors) return undefined
+  const conMensaje = errors as { message?: unknown }
+  if (typeof conMensaje.message === 'string') return conMensaje.message
+  for (const key of Object.keys(errors)) {
+    const msg = primerMensajeError((errors as Record<string, FieldErrorsImpl>)[key])
+    if (msg) return msg
+  }
+  return undefined
+}
+
 export default function CrearLandingFleepixPage() {
-  const { config, setConfig, cargando, guardando, error, publicar } = usePaginaPersistida(
+  const { datosIniciales, cargando, guardando, error, publicar, guardarDebounced } = usePaginaPersistida<LandingFleepixFormData>(
     'landing-fleepix',
-    fleepixBlankConfig,
+    fleepixBlankConfig as LandingFleepixFormData,
     '/crear/landing-fleepix',
   )
+
+  if (error) {
+    return (
+      <div className="crear-landing__error-pantalla">
+        <AlertCircle size={32} strokeWidth={1.5} />
+        <p>{error}</p>
+        <a href="/">Volver al inicio</a>
+      </div>
+    )
+  }
+
+  if (cargando || !datosIniciales) {
+    return <div className="crear-landing__error-pantalla">Cargando tu página…</div>
+  }
+
+  return (
+    <CrearLandingFleepixForm
+      datosIniciales={datosIniciales}
+      guardando={guardando}
+      publicar={publicar}
+      guardarDebounced={guardarDebounced}
+    />
+  )
+}
+
+function CrearLandingFleepixForm({
+  datosIniciales,
+  guardando,
+  publicar,
+  guardarDebounced,
+}: {
+  datosIniciales: LandingFleepixFormData
+  guardando: boolean
+  publicar: (slug: string, montoPagado: number) => Promise<void>
+  guardarDebounced: (data: LandingFleepixFormData) => void
+}) {
+  const { watch, setValue, handleSubmit, control } = useForm<LandingFleepixFormData>({
+    defaultValues: datosIniciales,
+    resolver: zodResolver(landingFleepixSchema),
+  })
+  const config = watch()
+  const faqFieldArray = useFieldArray({ control, name: 'faq.items' })
+
   const [resultado, setResultado] = useState<{ slug: string; url: string } | null>(null)
   const [publicando, setPublicando] = useState(false)
   const [errorPublicar, setErrorPublicar] = useState<string | null>(null)
   const [copiado, setCopiado] = useState(false)
   const [vistaMobile, setVistaMobile] = useState(false)
   const linkEdicion = typeof window !== 'undefined' ? window.location.href : ''
+
+  useEffect(() => {
+    const subscription = watch((value) => {
+      guardarDebounced(value as LandingFleepixFormData)
+    })
+    return () => subscription.unsubscribe()
+  }, [watch, guardarDebounced])
 
   function handleCopiarLink() {
     navigator.clipboard.writeText(linkEdicion).then(() => {
@@ -109,19 +183,73 @@ export default function CrearLandingFleepixPage() {
     })
   }
 
-  async function handleGenerar() {
-    if (!config.identidad.nombreEmpresa.trim()) {
-      setErrorPublicar('Falta el nombre de tu empresa.')
-      return
-    }
-    const faltantes = fotosSinCambiar(config)
+  function handleChange(path: string, value: string) {
+    setValue(path as Parameters<typeof setValue>[0], value, { shouldDirty: true })
+  }
+
+  function handleArchivoGenerico(path: string, file: File) {
+    const anterior = getPath(config, path) as string | undefined
+    setValue(path as Parameters<typeof setValue>[0], URL.createObjectURL(file), { shouldDirty: true })
+    subirArchivo(file)
+      .then((url) => {
+        setValue(path as Parameters<typeof setValue>[0], url, { shouldDirty: true })
+        eliminarArchivo(anterior)
+      })
+      .catch(() => {
+        setValue(path as Parameters<typeof setValue>[0], anterior ?? '', { shouldDirty: true })
+        setErrorPublicar('No pudimos subir el archivo. Probá de nuevo.')
+      })
+  }
+
+  function handleCheck(path: string, value: boolean) {
+    setValue(path as Parameters<typeof setValue>[0], value as never, { shouldDirty: true })
+  }
+
+  function handleSeccionToggle(key: string, value: boolean) {
+    setValue(`secciones.${key}` as Parameters<typeof setValue>[0], value as never, { shouldDirty: true })
+  }
+
+  function handleBeneficioIcono(i: number, value: string) {
+    handleChange(`beneficios.items.${i}.icono`, value)
+  }
+
+  function handleFuncionalidadChipIcono(i: number, value: string) {
+    handleChange(`funcionalidades.items.${i}.chipIcono`, value)
+  }
+
+  // --- FAQ (array dinámico) — solo agregar/quitar; el texto de cada
+  // pregunta/respuesta se edita inline en el preview (EditableText). ---
+  function agregarFaq() {
+    faqFieldArray.append({ pregunta: '', respuesta: '' })
+  }
+  function quitarFaq(i: number) {
+    faqFieldArray.remove(i)
+  }
+
+  // --- Bullets de la sección de contacto (array dinámico de strings, no
+  // de objetos — useFieldArray no aplica acá) — solo agregar/quitar; el
+  // texto de cada bullet se edita inline. Tampoco hay inputs individuales
+  // en el sidebar para estos, así que no hace falta una key estable. ---
+  function agregarContactoBullet() {
+    setValue('contactoSeccion.bullets', [...config.contactoSeccion.bullets, ''], { shouldDirty: true })
+  }
+  function quitarContactoBullet(i: number) {
+    setValue(
+      'contactoSeccion.bullets',
+      config.contactoSeccion.bullets.filter((_, idx) => idx !== i),
+      { shouldDirty: true },
+    )
+  }
+
+  async function onGenerarValido(data: LandingFleepixFormData) {
+    const faltantes = fotosSinCambiar(data)
     if (faltantes.length > 0) {
       setErrorPublicar(`Todavía tenés fotos de ejemplo sin cambiar: ${faltantes.join(', ')}. Subí las tuyas antes de publicar.`)
       return
     }
     setPublicando(true)
     setErrorPublicar(null)
-    let slug = slugify(config.identidad.nombreEmpresa)
+    let slug = slugify(data.identidad.nombreEmpresa)
     try {
       try {
         await publicar(slug, PRECIOS['landing-fleepix'])
@@ -137,73 +265,8 @@ export default function CrearLandingFleepixPage() {
     }
   }
 
-  function handleChange(path: string, value: string) {
-    setConfig((prev) => setPath(prev, path, value))
-  }
-
-  function handleArchivoGenerico(path: string, file: File) {
-    const anterior = getPath(config, path) as string | undefined
-    setConfig((prev) => setPath(prev, path, URL.createObjectURL(file)))
-    subirArchivo(file)
-      .then((url) => {
-        setConfig((prev) => setPath(prev, path, url))
-        eliminarArchivo(anterior)
-      })
-      .catch(() => {
-        setConfig((prev) => setPath(prev, path, anterior ?? ''))
-        setErrorPublicar('No pudimos subir el archivo. Probá de nuevo.')
-      })
-  }
-
-  function handleCheck(path: string, value: boolean) {
-    setConfig((prev) => setPath(prev, path, value))
-  }
-
-  function handleBeneficioIcono(i: number, value: string) {
-    setConfig((prev) => {
-      const items = [...prev.beneficios.items]
-      items[i] = { ...items[i], icono: value }
-      return { ...prev, beneficios: { ...prev.beneficios, items } }
-    })
-  }
-
-  function handleFuncionalidadChipIcono(i: number, value: string) {
-    setConfig((prev) => {
-      const items = [...prev.funcionalidades.items]
-      items[i] = { ...items[i], chipIcono: value }
-      return { ...prev, funcionalidades: { ...prev.funcionalidades, items } }
-    })
-  }
-
-  // --- FAQ (array dinámico) — solo agregar/quitar; el texto de cada
-  // pregunta/respuesta ahora se edita inline en el preview (EditableText). ---
-  function agregarFaq() {
-    setConfig((prev) => ({ ...prev, faq: { ...prev.faq, items: [...prev.faq.items, { pregunta: '', respuesta: '' }] } }))
-  }
-  function quitarFaq(i: number) {
-    setConfig((prev) => ({ ...prev, faq: { ...prev.faq, items: prev.faq.items.filter((_, idx) => idx !== i) } }))
-  }
-
-  // --- Bullets de la sección de contacto (array dinámico) — solo
-  // agregar/quitar; el texto de cada bullet se edita inline. ---
-  function agregarContactoBullet() {
-    setConfig((prev) => ({ ...prev, contactoSeccion: { ...prev.contactoSeccion, bullets: [...prev.contactoSeccion.bullets, ''] } }))
-  }
-  function quitarContactoBullet(i: number) {
-    setConfig((prev) => ({
-      ...prev,
-      contactoSeccion: { ...prev.contactoSeccion, bullets: prev.contactoSeccion.bullets.filter((_, idx) => idx !== i) },
-    }))
-  }
-
-  if (error) {
-    return (
-      <div className="crear-landing__error-pantalla">
-        <AlertCircle size={32} strokeWidth={1.5} />
-        <p>{error}</p>
-        <a href="/">Volver al inicio</a>
-      </div>
-    )
+  function onGenerarInvalido(errors: FieldErrors<LandingFleepixFormData>) {
+    setErrorPublicar(primerMensajeError(errors) ?? 'Revisá los campos del formulario.')
   }
 
   return (
@@ -221,14 +284,12 @@ export default function CrearLandingFleepixPage() {
         <h1>Armá tu landing</h1>
         <p>
           Vas viendo el resultado a la derecha, en tiempo real.
-          {cargando ? ' Cargando tu página…' : guardando ? ' Guardando…' : ' Guardado.'}
+          {guardando ? ' Guardando…' : ' Guardado.'}
         </p>
-        {!cargando && (
-          <p className="crear-landing__aviso-link">
-            <Bookmark size={15} strokeWidth={2} />
-            <span>Guardá esta URL (o marcala como favorita) — es tu único acceso para seguir editando más tarde.</span>
-          </p>
-        )}
+        <p className="crear-landing__aviso-link">
+          <Bookmark size={15} strokeWidth={2} />
+          <span>Guardá esta URL (o marcala como favorita) — es tu único acceso para seguir editando más tarde.</span>
+        </p>
 
         <details className="crear-landing__seccion" open>
           <summary>Identidad</summary>
@@ -242,6 +303,21 @@ export default function CrearLandingFleepixPage() {
           <CampoColor label="Color de fondo" path="apariencia.colorFondo" config={config} onChange={handleChange} />
           <CampoColor label="Color de texto" path="apariencia.colorTexto" config={config} onChange={handleChange} />
           <CampoColor label="Color de acento (botones, links, destacados)" path="apariencia.colorAcento" config={config} onChange={handleChange} />
+        </details>
+
+        <details className="crear-landing__seccion" open>
+          <summary>Secciones visibles</summary>
+          <p className="crear-landing__ayuda">Destildá para ocultar un bloque completo de la landing — se puede volver a mostrar cuando quieras.</p>
+          {SECCIONES.map(({ key, label }) => (
+            <label className="crear-landing__check" key={key}>
+              <input
+                type="checkbox"
+                checked={config.secciones?.[key] ?? true}
+                onChange={(e) => handleSeccionToggle(key, e.target.checked)}
+              />
+              {label}
+            </label>
+          ))}
         </details>
 
         <details className="crear-landing__seccion">
@@ -324,7 +400,7 @@ export default function CrearLandingFleepixPage() {
           <strong>Gratis</strong> por tiempo limitado
         </p>
         {errorPublicar && <p className="crear-landing__error">{errorPublicar}</p>}
-        <button type="button" className="crear-landing__btn-generar" onClick={handleGenerar} disabled={publicando}>
+        <button type="button" className="crear-landing__btn-generar" onClick={handleSubmit(onGenerarValido, onGenerarInvalido)} disabled={publicando}>
           {publicando ? 'Generando…' : 'Generar landing'}
         </button>
 

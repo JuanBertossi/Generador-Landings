@@ -1,9 +1,12 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useForm, useFieldArray, type FieldErrors, type FieldErrorsImpl } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import './styles/CrearLandingVortex.css'
 import VortexPage from './views/VortexPage'
-import { vortexBlankConfig, type VortexConfig } from './config'
+import { vortexBlankConfig } from './config'
+import { landingVortexSchema, type LandingVortexFormData } from './schemas/landingVortex.schema'
 import { ICONOS } from './lib/iconos'
-import { setPath, getPath } from '@/shared/lib/objectPath'
+import { getPath } from '@/shared/lib/objectPath'
 import { slugify } from '@/shared/lib/slugify'
 import { PRECIOS, formatoPrecio } from '@/shared/lib/precios'
 import { usePaginaPersistida } from '@/shared/hooks/usePaginaPersistida'
@@ -15,7 +18,7 @@ import { Bookmark, CheckCircle2, Copy, Check, AlertCircle, Globe, Monitor, Smart
 
 const OPCIONES_ICONO = Object.keys(ICONOS)
 
-const SECCIONES: { key: keyof NonNullable<VortexConfig['secciones']>; label: string }[] = [
+const SECCIONES: { key: keyof NonNullable<LandingVortexFormData['secciones']>; label: string }[] = [
   { key: 'beneficios', label: 'Beneficios' },
   { key: 'soluciones', label: 'Soluciones (productos)' },
   { key: 'servicios', label: 'Servicios' },
@@ -26,28 +29,25 @@ const SECCIONES: { key: keyof NonNullable<VortexConfig['secciones']>; label: str
   { key: 'ctaFinal', label: 'CTA final' },
 ]
 
+const MAX_CASOS = 4
+
 function Field({
   label,
   path,
   config,
   onChange,
-  textarea = false,
 }: {
   label: string
   path: string
-  config: VortexConfig
+  config: LandingVortexFormData
   onChange: (path: string, value: string) => void
-  textarea?: boolean
 }) {
   const value = (getPath(config, path) as string) ?? ''
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => onChange(path, e.target.value)
   return (
     <div className="crear-vortex__field">
       <label htmlFor={path}>{label}</label>
-      {textarea ? (
-        <textarea id={path} value={value} onChange={(e) => onChange(path, e.target.value)} />
-      ) : (
-        <input id={path} type="text" value={value} onChange={(e) => onChange(path, e.target.value)} />
-      )}
+      <input id={path} type="text" value={value} onChange={handleChange} />
     </div>
   )
 }
@@ -60,7 +60,7 @@ function CampoColor({
 }: {
   label: string
   path: string
-  config: VortexConfig
+  config: LandingVortexFormData
   onChange: (path: string, value: string) => void
 }) {
   const value = (getPath(config, path) as string) ?? '#000000'
@@ -75,12 +75,66 @@ function CampoColor({
   )
 }
 
+function primerMensajeError(errors: FieldErrors<LandingVortexFormData> | FieldErrorsImpl | undefined): string | undefined {
+  if (!errors) return undefined
+  const conMensaje = errors as { message?: unknown }
+  if (typeof conMensaje.message === 'string') return conMensaje.message
+  for (const key of Object.keys(errors)) {
+    const msg = primerMensajeError((errors as Record<string, FieldErrorsImpl>)[key])
+    if (msg) return msg
+  }
+  return undefined
+}
+
 export default function CrearLandingVortexPage() {
-  const { config, setConfig, cargando, guardando, error, publicar } = usePaginaPersistida(
+  const { datosIniciales, cargando, guardando, error, publicar, guardarDebounced } = usePaginaPersistida<LandingVortexFormData>(
     'landing-vortex',
-    vortexBlankConfig,
+    vortexBlankConfig as LandingVortexFormData,
     '/crear/landing-vortex',
   )
+
+  if (error) {
+    return (
+      <div className="crear-vortex__error-pantalla">
+        <p>{error}</p>
+        <a href="/">Volver al inicio</a>
+      </div>
+    )
+  }
+
+  if (cargando || !datosIniciales) {
+    return <div className="crear-vortex__error-pantalla">Cargando tu página…</div>
+  }
+
+  return (
+    <CrearLandingVortexForm
+      datosIniciales={datosIniciales}
+      guardando={guardando}
+      publicar={publicar}
+      guardarDebounced={guardarDebounced}
+    />
+  )
+}
+
+function CrearLandingVortexForm({
+  datosIniciales,
+  guardando,
+  publicar,
+  guardarDebounced,
+}: {
+  datosIniciales: LandingVortexFormData
+  guardando: boolean
+  publicar: (slug: string, montoPagado: number) => Promise<void>
+  guardarDebounced: (data: LandingVortexFormData) => void
+}) {
+  const { watch, setValue, handleSubmit, control } = useForm<LandingVortexFormData>({
+    defaultValues: datosIniciales,
+    resolver: zodResolver(landingVortexSchema),
+  })
+  const config = watch()
+  const casosFieldArray = useFieldArray({ control, name: 'testimonials.items' })
+  const faqFieldArray = useFieldArray({ control, name: 'faq.items' })
+
   const [resultado, setResultado] = useState<{ slug: string; url: string } | null>(null)
   const [publicando, setPublicando] = useState(false)
   const [errorPublicar, setErrorPublicar] = useState<string | null>(null)
@@ -88,6 +142,13 @@ export default function CrearLandingVortexPage() {
   const [vistaMobile, setVistaMobile] = useState(false)
   const previewScrollRef = useRef<HTMLDivElement>(null)
   const linkEdicion = typeof window !== 'undefined' ? window.location.href : ''
+
+  useEffect(() => {
+    const subscription = watch((value) => {
+      guardarDebounced(value as LandingVortexFormData)
+    })
+    return () => subscription.unsubscribe()
+  }, [watch, guardarDebounced])
 
   function handleCopiarLink() {
     navigator.clipboard.writeText(linkEdicion).then(() => {
@@ -97,35 +158,58 @@ export default function CrearLandingVortexPage() {
   }
 
   function handleChange(path: string, value: string) {
-    setConfig((prev) => setPath(prev, path, value))
+    setValue(path as Parameters<typeof setValue>[0], value, { shouldDirty: true })
   }
 
   function handleSeccionToggle(key: string, value: boolean) {
-    setConfig((prev) => setPath(prev, `secciones.${key}`, value))
+    setValue(`secciones.${key}` as Parameters<typeof setValue>[0], value as never, { shouldDirty: true })
   }
 
   function handleArchivoChange(path: string, file: File) {
     const anterior = getPath(config, path) as string | undefined
-    setConfig((prev) => setPath(prev, path, URL.createObjectURL(file)))
+    setValue(path as Parameters<typeof setValue>[0], URL.createObjectURL(file), { shouldDirty: true })
     subirArchivo(file)
       .then((url) => {
-        setConfig((prev) => setPath(prev, path, url))
+        setValue(path as Parameters<typeof setValue>[0], url, { shouldDirty: true })
         eliminarArchivo(anterior)
       })
       .catch(() => {
-        setConfig((prev) => setPath(prev, path, anterior ?? ''))
+        setValue(path as Parameters<typeof setValue>[0], anterior ?? '', { shouldDirty: true })
         setErrorPublicar('No pudimos subir el archivo. Probá de nuevo.')
       })
   }
 
-  async function handleGenerar() {
-    if (!config.identidad.nombreEmpresa.trim()) {
-      setErrorPublicar('Falta el nombre de tu empresa.')
-      return
-    }
+  // --- Beneficios (problem, 3 items fijos) — solo el ícono queda en el panel, el resto se edita inline ---
+  function handleProblemIcono(i: number, value: string) {
+    handleChange(`problem.items.${i}.icono`, value)
+  }
+
+  // --- Proceso (4 fijos) — solo el ícono queda en el panel ---
+  function handleProcesoIcono(i: number, value: string) {
+    handleChange(`process.items.${i}.icono`, value)
+  }
+
+  // --- Casos (dinámico, máximo 4 — el mismo tope que usa el tile "+" del preview) — agregar/quitar queda en el panel, el texto de cada caso se edita inline ---
+  function agregarCaso() {
+    if (casosFieldArray.fields.length >= MAX_CASOS) return
+    casosFieldArray.append({ tag: '', titulo: '', descripcion: '', logoUrl: '' })
+  }
+  function quitarCaso(i: number) {
+    casosFieldArray.remove(i)
+  }
+
+  // --- FAQ (dinámico) — agregar/quitar queda en el panel, el texto de cada pregunta se edita inline ---
+  function agregarFaq() {
+    faqFieldArray.append({ pregunta: '', respuesta: '' })
+  }
+  function quitarFaq(i: number) {
+    faqFieldArray.remove(i)
+  }
+
+  async function onGenerarValido(data: LandingVortexFormData) {
     setPublicando(true)
     setErrorPublicar(null)
-    let slug = slugify(config.identidad.nombreEmpresa)
+    let slug = slugify(data.identidad.nombreEmpresa)
     try {
       try {
         await publicar(slug, PRECIOS['landing-vortex'])
@@ -141,51 +225,8 @@ export default function CrearLandingVortexPage() {
     }
   }
 
-  // --- Beneficios (problem, 3 items fijos) — solo el ícono queda en el panel, el resto se edita inline ---
-  function handleProblemIcono(i: number, value: string) {
-    setConfig((prev) => {
-      const items = [...prev.problem.items]
-      items[i] = { ...items[i], icono: value }
-      return { ...prev, problem: { ...prev.problem, items } }
-    })
-  }
-
-  // --- Proceso (4 fijos) — solo el ícono queda en el panel ---
-  function handleProcesoIcono(i: number, value: string) {
-    setConfig((prev) => {
-      const items = [...prev.process.items]
-      items[i] = { ...items[i], icono: value }
-      return { ...prev, process: { ...prev.process, items } }
-    })
-  }
-
-  // --- Casos (dinámico, máximo 4 — el mismo tope que usa el tile "+" del preview) — agregar/quitar queda en el panel, el texto de cada caso se edita inline ---
-  const MAX_CASOS = 4
-  function agregarCaso() {
-    setConfig((prev) => {
-      if (prev.testimonials.items.length >= MAX_CASOS) return prev
-      return { ...prev, testimonials: { ...prev.testimonials, items: [...prev.testimonials.items, { tag: '', titulo: '', descripcion: '', logoUrl: '' }] } }
-    })
-  }
-  function quitarCaso(i: number) {
-    setConfig((prev) => ({ ...prev, testimonials: { ...prev.testimonials, items: prev.testimonials.items.filter((_, idx) => idx !== i) } }))
-  }
-
-  // --- FAQ (dinámico) — agregar/quitar queda en el panel, el texto de cada pregunta se edita inline ---
-  function agregarFaq() {
-    setConfig((prev) => ({ ...prev, faq: { ...prev.faq, items: [...prev.faq.items, { pregunta: '', respuesta: '' }] } }))
-  }
-  function quitarFaq(i: number) {
-    setConfig((prev) => ({ ...prev, faq: { ...prev.faq, items: prev.faq.items.filter((_, idx) => idx !== i) } }))
-  }
-
-  if (error) {
-    return (
-      <div className="crear-vortex__error-pantalla">
-        <p>{error}</p>
-        <a href="/">Volver al inicio</a>
-      </div>
-    )
+  function onGenerarInvalido(errors: FieldErrors<LandingVortexFormData>) {
+    setErrorPublicar(primerMensajeError(errors) ?? 'Revisá los campos del formulario.')
   }
 
   return (
@@ -203,14 +244,12 @@ export default function CrearLandingVortexPage() {
         <h1>Armá tu landing</h1>
         <p>
           Vas viendo el resultado a la derecha, en tiempo real. Hacé clic sobre cualquier texto o foto de la vista previa para editarlo directamente.
-          {cargando ? ' Cargando tu página…' : guardando ? ' Guardando…' : ' Guardado.'}
+          {guardando ? ' Guardando…' : ' Guardado.'}
         </p>
-        {!cargando && (
-          <p className="crear-vortex__aviso-link">
-            <Bookmark size={15} strokeWidth={2} />
-            <span>Guardá esta URL (o marcala como favorita) — es tu único acceso para seguir editando más tarde.</span>
-          </p>
-        )}
+        <p className="crear-vortex__aviso-link">
+          <Bookmark size={15} strokeWidth={2} />
+          <span>Guardá esta URL (o marcala como favorita) — es tu único acceso para seguir editando más tarde.</span>
+        </p>
 
         <details className="crear-vortex__seccion" open>
           <summary>Identidad</summary>
@@ -285,13 +324,13 @@ export default function CrearLandingVortexPage() {
         <details className="crear-vortex__seccion">
           <summary>Casos de éxito</summary>
           <p className="crear-vortex__ayuda">El texto y el logo de cada caso se editan haciendo clic directo en la vista previa. Acá solo agregás o quitás casos.</p>
-          {config.testimonials.items.map((_, i) => (
-            <div className="crear-vortex__tarjeta" key={i}>
+          {casosFieldArray.fields.map((field, i) => (
+            <div className="crear-vortex__tarjeta" key={field.id}>
               <p className="crear-vortex__tarjeta-titulo">Caso {i + 1}</p>
               <button type="button" className="crear-vortex__btn-quitar" onClick={() => quitarCaso(i)}>Quitar caso</button>
             </div>
           ))}
-          {config.testimonials.items.length < MAX_CASOS && (
+          {casosFieldArray.fields.length < MAX_CASOS && (
             <button type="button" className="crear-vortex__btn-agregar" onClick={agregarCaso}>+ Agregar caso</button>
           )}
         </details>
@@ -299,8 +338,8 @@ export default function CrearLandingVortexPage() {
         <details className="crear-vortex__seccion">
           <summary>Preguntas frecuentes</summary>
           <p className="crear-vortex__ayuda">La pregunta y la respuesta se editan haciendo clic directo en la vista previa. Acá solo agregás o quitás preguntas.</p>
-          {config.faq.items.map((_, i) => (
-            <div className="crear-vortex__tarjeta" key={i}>
+          {faqFieldArray.fields.map((field, i) => (
+            <div className="crear-vortex__tarjeta" key={field.id}>
               <p className="crear-vortex__tarjeta-titulo">Pregunta {i + 1}</p>
               <button type="button" className="crear-vortex__btn-quitar" onClick={() => quitarFaq(i)}>Quitar pregunta</button>
             </div>
@@ -330,7 +369,7 @@ export default function CrearLandingVortexPage() {
           <strong>Gratis</strong> por tiempo limitado
         </p>
         {errorPublicar && <p className="crear-vortex__error">{errorPublicar}</p>}
-        <button type="button" className="crear-vortex__btn-generar" onClick={handleGenerar} disabled={publicando}>
+        <button type="button" className="crear-vortex__btn-generar" onClick={handleSubmit(onGenerarValido, onGenerarInvalido)} disabled={publicando}>
           {publicando ? 'Generando…' : 'Generar landing'}
         </button>
 
@@ -374,7 +413,7 @@ export default function CrearLandingVortexPage() {
               onQuitarCaso={quitarCaso}
               onAgregarFaq={agregarFaq}
               onQuitarFaq={quitarFaq}
-              scrollContainerRef={previewScrollRef}
+              scrollContainerRef={previewScrollRef as React.RefObject<HTMLElement>}
             />
           </div>
         )}

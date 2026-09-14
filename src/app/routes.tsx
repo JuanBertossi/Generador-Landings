@@ -16,7 +16,7 @@ function InvitacionEjemplo() {
   return <InvitacionPageLazy saltarBienvenida={params.get("vista") === "directa"} />;
 }
 const CrearInvitacion = lazy(
-  () => import("@/features/tema-invitacion/CrearInvitacionPage.jsx")
+  () => import("@/features/tema-invitacion/CrearInvitacionPage.tsx")
 );
 const CrearLandingFleepix = lazy(
   () => import("@/features/tema-landing-fleepix/CrearLandingFleepixPage")

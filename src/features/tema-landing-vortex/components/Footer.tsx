@@ -42,11 +42,12 @@ export default function Footer({ config }: { config: VortexConfig }) {
                 style={{ height: "48px", width: "auto", display: "block" }}
               />
             ) : (
-              <img
-                src="/assets/vortex/brand/isotipo-blanco.svg"
-                alt={identidad.nombreEmpresa || "Vortex"}
-                style={{ height: "48px", width: "auto", display: "block" }}
-              />
+              // Sin logo propio subido: mostramos el nombre de la empresa
+              // como texto, no el isotipo de Vortex — no es el branding del
+              // cliente, no puede quedar en su sitio publicado.
+              <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 700, fontSize: "24px", color: "var(--v-text)" }}>
+                {identidad.nombreEmpresa}
+              </span>
             )}
           </div>
           <EditableText

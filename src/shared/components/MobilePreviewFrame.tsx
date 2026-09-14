@@ -8,6 +8,52 @@ type MobilePreviewFrameProps = {
 }
 
 /**
+ * Los carruseles horizontales de los temas (`overflow-x: auto`) están
+ * armados para dedo (swipe táctil real) — acá adentro del iframe se navega
+ * con mouse, que no puede "swipear". Este listener genérico agrega
+ * click-and-drag: al hacer mousedown busca el ancestro scrolleable más
+ * cercano y arrastra su `scrollLeft` con el mouse, sin tocar el código de
+ * cada tema.
+ */
+function habilitarDragScrollHorizontal(doc: Document) {
+  let elementoActivo: HTMLElement | null = null
+  let arrastro = false
+  let startX = 0
+  let scrollInicial = 0
+
+  doc.addEventListener('mousedown', (e) => {
+    let el = e.target as HTMLElement | null
+    while (el && el !== doc.body) {
+      const estilo = doc.defaultView?.getComputedStyle(el)
+      if (estilo && (estilo.overflowX === 'auto' || estilo.overflowX === 'scroll') && el.scrollWidth > el.clientWidth) {
+        elementoActivo = el
+        break
+      }
+      el = el.parentElement
+    }
+    if (!elementoActivo) return
+    arrastro = true
+    startX = e.pageX
+    scrollInicial = elementoActivo.scrollLeft
+    elementoActivo.style.cursor = 'grabbing'
+    e.preventDefault()
+  })
+
+  doc.addEventListener('mousemove', (e) => {
+    if (!arrastro || !elementoActivo) return
+    elementoActivo.scrollLeft = scrollInicial - (e.pageX - startX)
+  })
+
+  function soltar() {
+    if (elementoActivo) elementoActivo.style.cursor = ''
+    elementoActivo = null
+    arrastro = false
+  }
+  doc.addEventListener('mouseup', soltar)
+  doc.addEventListener('mouseleave', soltar)
+}
+
+/**
  * Los media queries de Tailwind/CSS evalúan el viewport real del documento
  * donde vive la hoja de estilos — angostar un <div> contenedor no alcanza
  * para disparar el layout mobile. Por eso esto es un <iframe> con ancho
@@ -36,6 +82,7 @@ export function MobilePreviewFrame({ children, width = 390, height = 800 }: Mobi
       doc.body.style.margin = '0'
       doc.body.style.minHeight = '100%'
       doc.body.style.overflowX = 'hidden'
+      habilitarDragScrollHorizontal(doc)
       setBodyEl(doc.body)
     }
     iframe.addEventListener('load', alCargar)

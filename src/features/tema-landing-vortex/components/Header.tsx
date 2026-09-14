@@ -95,13 +95,12 @@ export default function Header({ config }: { config: VortexConfig }) {
                 className="h-[44px] w-auto block"
               />
             ) : (
-              <img
-                src="/assets/vortex/brand/isotipo-blanco.svg"
-                alt={config.identidad.nombreEmpresa || "Vortex"}
-                width={41}
-                height={48}
-                className="h-[38px] w-auto block"
-              />
+              // Sin logo propio subido: mostramos el nombre de la empresa
+              // como texto, no el isotipo de Vortex — no es el branding del
+              // cliente, no puede quedar en su sitio publicado.
+              <span className="font-bricolage font-bold text-[20px] text-white" style={{ color: "var(--v-text)" }}>
+                {config.identidad.nombreEmpresa}
+              </span>
             )}
           </motion.a>
 
